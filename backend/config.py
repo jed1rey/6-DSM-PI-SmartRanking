@@ -13,8 +13,8 @@ DB_CONFIG = {
 }
 
 # Chave secreta usada para assinar e verificar JWTs
-SECRET_KEY = os.getenv("SECRET_KEY")
-
+# SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = None
 # Validação simples para evitar erros ao rodar
 if not SECRET_KEY:
     print("AVISO: SECRET_KEY não definida! O JWT não funcionará corretamente.")

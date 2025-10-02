@@ -3,20 +3,18 @@ import datetime
 from config import SECRET_KEY
 import sys
 
+# Define a chave secreta como uma constante em bytes, eliminando a inconsistência do .env
+CHAVE_SECRETA_FIXA = b'1234' 
+
 def _get_secret_key_bytes():
-    """Converte e limpa a SECRET_KEY para o formato bytes, garantindo consistência."""
-    # Força a SECRET_KEY a ser string para remover espaços invisíveis e depois converte para bytes
-    return str(SECRET_KEY).strip().encode('utf-8')
+    """Retorna a chave secreta fixa em formato bytes."""
+    return CHAVE_SECRETA_FIXA
 
 def gerar_token(user_id: int, user_email: str) -> str:
     """
     Gera um JWT (JSON Web Token) contendo o ID e e-mail do usuário.
-    O token expira após 24 horas.
     """
     chave_bytes = _get_secret_key_bytes()
-
-    if not chave_bytes:
-        raise ValueError("A chave secreta (SECRET_KEY) não está configurada ou é inválida.")
 
     # DEBUG: Mostra a chave usada para assinar
     print(f"DEBUG JWT: Chave usada na ASSINATURA (Login): {chave_bytes!r}", file=sys.stderr)
@@ -44,16 +42,13 @@ def decodificar_token(token: str) -> dict:
     # DEBUG: Mostra a chave usada para verificar
     print(f"DEBUG JWT: Chave usada na VERIFICAÇÃO (Pesquisa): {chave_bytes!r}", file=sys.stderr)
 
-    if not chave_bytes:
-        return {"error": "Configuração de chave secreta ausente."}
-        
     try:
         # Decodifica o token usando a chave em bytes
         return jwt.decode(token, chave_bytes, algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
         return {"error": "Token expirado. Faça login novamente."}
     except jwt.InvalidSignatureError:
-        # Token inválido: Chave incorreta ou token adulterado.
+        # Token inválido: A chave não bateu
         return {"error": "Token inválido."}
     except jwt.InvalidTokenError:
         return {"error": "Token inválido."}
