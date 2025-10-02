@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
-from controllers.auth_controller import registrar_usuario, autenticar_usuario
+from controllers.auth_controller import (
+    registrar_usuario, autenticar_usuario, listar_usuarios, buscar_usuario_por_id
+)
+from routes.pesquisas import token_required # Importação Corrigida
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -10,7 +13,6 @@ def register():
     """
     data = request.json
     
-    # Validação básica de campos
     if not all(data.get(k) for k in ("nome", "data_nascimento", "email", "senha")):
         return jsonify({"error": "Dados de registro incompletos. Todos os campos são obrigatórios."}), 400
 
@@ -19,7 +21,6 @@ def register():
     if user_id:
         return jsonify({"message": "Usuário registrado com sucesso!", "user_id": user_id}), 201
     
-    # Retorno genérico em caso de falha (pode ser email já em uso ou erro no DB)
     return jsonify({"error": "Falha ao registrar usuário. Tente novamente ou verifique o email."}), 409
 
 @auth_bp.route("/login", methods=["POST"])
@@ -37,3 +38,24 @@ def login():
     if token:
         return jsonify({"token": token})
     return jsonify({"error": "Credenciais inválidas"}), 401
+
+
+# --- ROTAS DE USUÁRIOS (PÚBLICAS) ---
+
+@auth_bp.route("/users", methods=["GET"])
+def get_all_users():
+    """
+    Retorna todos os usuários (rota pública).
+    """
+    usuarios = listar_usuarios()
+    return jsonify(usuarios)
+
+@auth_bp.route("/users/<int:user_id>", methods=["GET"])
+def get_user_by_id(user_id):
+    """
+    Retorna um usuário por ID (rota pública).
+    """
+    usuario = buscar_usuario_por_id(user_id)
+    if usuario:
+        return jsonify(usuario)
+    return jsonify({"message": "Usuário não encontrado"}), 404
