@@ -1,24 +1,20 @@
-import  React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// Importando as telas
-import LoginScreen from './screens/LoginScreen';
-import CadastroScreen from './screens/CadastroScreen';
-import InsercaoScreen from './screens/InsercaoScreen';
-import RankingScreen from './screens/RankingScreen';
-
-const Stack = createNativeStackNavigator();
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Cadastro" component={CadastroScreen} />
-        <Stack.Screen name="Inserção" component={InsercaoScreen} />
-        <Stack.Screen name="Ranking" component={RankingScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.container}>
+      <Text>SmartRanking Mobile - Carregando...</Text>
+      <StatusBar style="auto" />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

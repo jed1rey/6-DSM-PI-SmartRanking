@@ -1,19 +1,44 @@
 import React from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Cadastro() {
+  const { darkMode } = useTheme();
+
   return (
-    <div style={styles.container}>
-      <h2>Cadastro</h2>
-      <input style={styles.input} type="text" placeholder="Nome" />
-      <input style={styles.input} type="date" placeholder="Data de Nascimento" />
-      <input style={styles.input} type="password" placeholder="Senha" />
-      <button style={styles.button}>Cadastrar</button>
+    <div >
+      <h2 style={titleStyle(darkMode)}>Cadastro</h2>
+      <input style={inputStyle(darkMode)} placeholder="Nome" />
+      <input style={inputStyle(darkMode)} type="date" />
+      <input style={inputStyle(darkMode)} type="password" placeholder="Senha" />
+      <button style={buttonStyle(darkMode)}>Cadastrar</button>
     </div>
   );
 }
 
-const styles = {
-  container: { display: "flex", flexDirection: "column", alignItems: "center", marginTop: 50 },
-  input: { margin: 10, padding: 10, width: 200 },
-  button: { padding: 10, width: 220, background: "green", color: "#fff", border: "none" }
-};
+
+
+const titleStyle = (darkMode) => ({ 
+  marginBottom: 50, 
+  color: darkMode ? "#e8eaed" : "#202124",
+  textAlign: "center"
+ });
+const inputStyle = (darkMode) => ({
+  margin: "10px 0",
+  padding: "12px",
+  width: "96%",
+  borderRadius: "6px",
+  border: darkMode ? "1px solid #555" : "1px solid #ccc",
+  backgroundColor: darkMode ? "#3c3c3c" : "#f9f9f9",
+  color: darkMode ? "#fff" : "#000",
+});
+const buttonStyle = (darkMode) => ({
+  marginTop: "15px",
+  padding: "12px",
+  width: "100%",
+  background: darkMode ? "#2e7d32" : "#2e7d32",
+  color: "#fff",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontWeight: "bold",
+});
