@@ -1,0 +1,293 @@
+openapi: 3.0.0
+info:
+  title: Smart Ranking API
+  description: API para autenticação de usuários e criação/consulta de histórico de pesquisas no sistema Smart Ranking.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+    description: Servidor de Desenvolvimento Local
+tags:
+  - name: Autenticação
+    description: Registro e Login de Usuários
+  - name: Usuários (Público)
+    description: Consulta pública de dados básicos de usuários
+  - name: Pesquisas
+    description: Criação de novas pesquisas (Protegida) e consulta ao histórico (Pública)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UsuarioInput:
+      type: object
+      properties:
+        nome:
+          type: string
+          example: João da Silva
+        data_nascimento:
+          type: string
+          format: date
+          example: 1995-10-25
+        email:
+          type: string
+          format: email
+          example: joao.silva@exemplo.com
+        senha:
+          type: string
+          example: senhaforte123
+      required:
+        - nome
+        - data_nascimento
+        - email
+        - senha
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: joao.silva@exemplo.com
+        senha:
+          type: string
+          example: senhaforte123
+      required:
+        - email
+        - senha
+    TokenOutput:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT Bearer Token para acesso a rotas protegidas.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOi...
+    PesquisaInput:
+      type: object
+      properties:
+        categoria:
+          type: string
+          example: Jogos
+        genero:
+          type: string
+          example: Estrategia
+        preco_opcao:
+          type: string
+          enum: [gratuito, pago_ate_10, pago_acima_10]
+          example: gratuito
+        ordenacao:
+          type: string
+          enum: [score_inteligente, rating, popularidade, custo_beneficio]
+          example: score_inteligente
+      required:
+        - categoria
+        - genero
+        - preco_opcao
+    PesquisaOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+        usuario_id:
+          type: integer
+        categoria:
+          type: string
+        genero:
+          type: string
+        criado_em:
+          type: string
+          format: date-time
+    ResultadoRanking:
+      type: object
+      properties:
+        app_nome:
+          type: string
+        score:
+          type: number
+          format: float
+    PesquisaCriadaOutput:
+      type: object
+      properties:
+        message:
+          type: string
+        pesquisa_id:
+          type: integer
+        top_5_resultados:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResultadoRanking'
+    UsuarioDetalhe:
+      type: object
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        data_nascimento:
+          type: string
+          format: date
+        criado_em:
+          type: string
+          format: date-time
+
+paths:
+  /auth/register:
+    post:
+      tags: [Autenticação]
+      summary: Registra um novo usuário no sistema.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioInput'
+      responses:
+        '201':
+          description: Usuário registrado com sucesso.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user_id:
+                    type: integer
+        '400':
+          description: Dados incompletos.
+        '409':
+          description: Email já cadastrado ou erro de integridade no DB.
+
+  /auth/login:
+    post:
+      tags: [Autenticação]
+      summary: Autentica um usuário e retorna um JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Login bem-sucedido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenOutput'
+        '401':
+          description: Credenciais inválidas.
+
+  /auth/users:
+    get:
+      tags: [Usuários (Público)]
+      summary: Lista todos os usuários cadastrados.
+      responses:
+        '200':
+          description: Lista de usuários retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioDetalhe'
+
+  /auth/users/{user_id}:
+    get:
+      tags: [Usuários (Público)]
+      summary: Obtém um usuário específico por ID.
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuário encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioDetalhe'
+        '404':
+          description: Usuário não encontrado.
+
+  /api/pesquisas:
+    post:
+      tags: [Pesquisas]
+      summary: Cria uma nova pesquisa e simula o ranking.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PesquisaInput'
+      responses:
+        '201':
+          description: Pesquisa criada e ranking simulado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PesquisaCriadaOutput'
+        '401':
+          description: Não autorizado (Token ausente ou inválido).
+    get:
+      tags: [Pesquisas]
+      summary: Obtém o histórico COMPLETO de todas as pesquisas do sistema (Público).
+      responses:
+        '200':
+          description: Lista de todas as pesquisas retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PesquisaOutput'
+
+  /api/pesquisas/user/{usuario_id}:
+    get:
+      tags: [Pesquisas]
+      summary: Obtém o histórico de pesquisas de um usuário específico (Público).
+      parameters:
+        - name: usuario_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Histórico de pesquisas do usuário retornado.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PesquisaOutput'
+        '404':
+          description: Usuário não encontrado.
+
+  /api/pesquisas/{pesquisa_id}:
+    get:
+      tags: [Pesquisas]
+      summary: Obtém uma pesquisa específica por ID (Público).
+      parameters:
+        - name: pesquisa_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalhes da pesquisa retornados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PesquisaOutput'
+        '404':
+          description: Pesquisa não encontrada.
