@@ -32,7 +32,7 @@ app.register_blueprint(pesquisas_bp, url_prefix="/api")
 @app.route("/")
 def home():
     """Rota de saúde da API."""
-    return "Backend Smart Ranking funcionando! 🚀"
+    return "Backend Smart Ranking! 🚀"
 
 # ------------------------------
 # Tratamento de Erros
