@@ -2,8 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../context/ThemeContext';
-import Icon from 'react-native-vector-icons/Feather';
-import { View, Image } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 
 import Login from '../screens/Login';
 import Cadastro from '../screens/Cadastro';
@@ -13,13 +12,21 @@ import Perfil from '../screens/Perfil';
 
 const Tab = createBottomTabNavigator();
 
-
 const pageColors = {
   Login: "#1976d2",      
   Cadastro: "#2e7d32",   
   Pesquisa: "#fbc02d",  
   Ranking: "#d32f2f",    
-  Perfil: "#bdbdbd",     
+  Perfil: "#bdbdbd",
+};
+
+
+const customIcons = {
+  Login: require('../../assets/loginSR.png'),
+  Cadastro: require('../../assets/cadastroSR.png'),
+  Pesquisa: require('../../assets/pesquisaSR.png'),
+  Ranking: require('../../assets/rankingSR.png'),
+  Perfil: require('../../assets/perfilSR.png'),
 };
 
 
@@ -29,21 +36,12 @@ function CustomHeader({ route, darkMode }) {
   return (
     <View style={{
       backgroundColor: headerColor,
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-      flexDirection: 'center',
       justifyContent: 'center',
       alignItems: 'center',
       borderBottomWidth: 1,
       borderBottomColor: darkMode ? '#444' : '#ddd',
-      height: 150, 
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
-      elevation: 6,
+      height: 150,
     }}>
-      
       <Image 
         source={require('../../assets/LogoSR.png')}
         style={{ 
@@ -66,40 +64,41 @@ export default function AppNavigator() {
           const tabColor = pageColors[route.name];
           
           return {
-            
             header: () => <CustomHeader route={route} darkMode={darkMode} />,
-            
             
             tabBarStyle: {
               backgroundColor: tabColor,
               borderTopColor: darkMode ? '#444' : '#ddd',
               borderTopWidth: 1,
-              height: 75, 
-              paddingBottom: 12,
+              height: 60,
+              paddingBottom: 8,
               paddingTop: 8,
             },
-            tabBarActiveTintColor: darkMode ? '#fff' : '#000',
-            tabBarInactiveTintColor: darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            tabBarActiveTintColor: '#ffffff',
+            tabBarInactiveTintColor: 'rgba(255,255,255,0.7)',
             tabBarLabelStyle: {
-              fontSize: 13, 
-              fontWeight: '600',
-              marginBottom: 4,
+              fontSize: 12, 
+              fontWeight: '500',
             },
-            tabBarIcon: ({ color, size, focused }) => {
-              let iconName;
+            
+          
+            tabBarIcon: ({ focused }) => {
+              const iconSource = customIcons[route.name];
               
-              if (route.name === 'Login') iconName = 'log-in';
-              else if (route.name === 'Cadastro') iconName = 'user-plus';
-              else if (route.name === 'Pesquisa') iconName = 'search';
-              else if (route.name === 'Ranking') iconName = 'bar-chart-2';
-              else if (route.name === 'Perfil') iconName = 'user';
-
               return (
-                <Icon 
-                  name={iconName} 
-                  size={focused ? 28 : 26} 
-                  color={color} 
-                />
+                <View style={styles.iconContainer}>
+                  <Image 
+                    source={iconSource}
+                    style={[
+                      styles.icon,
+                      { 
+                        tintColor: focused ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                        opacity: focused ? 1 : 0.7,
+                      }
+                    ]}
+                    resizeMode="contain"
+                  />
+                </View>
               );
             },
           };
@@ -114,3 +113,16 @@ export default function AppNavigator() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 28,
+    height: 28,
+  },
+  icon: {
+    width: 22,
+    height: 22,
+  },
+});
