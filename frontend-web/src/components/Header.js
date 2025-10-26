@@ -1,11 +1,15 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { FiSun, FiMoon } from "react-icons/fi";
+import { logout, isLoggedIn } from "../services/api";
+import { getUserFromToken } from "../utils/auth";
 
 export default function Header() {
   const { darkMode, toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = getUserFromToken();
 
   const pageColors = {
     "/": "#1976d2",
@@ -16,6 +20,11 @@ export default function Header() {
   };
 
   const headerColor = pageColors[location.pathname] || "#202124";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <header
@@ -34,15 +43,11 @@ export default function Header() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "30px" }}>
-        
-                <img 
-                    src="/LogoSR.png" 
-                    alt="SmartRanking Logo" 
-                    style={{ 
-                        height: "80px", 
-                        width: "auto" 
-                    }} 
-                />
+        <img
+          src="/LogoSR.png"
+          alt="SmartRanking Logo"
+          style={{ height: "80px", width: "auto" }}
+        />
         <nav style={{ display: "flex", gap: "20px" }}>
           <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>Login</Link>
           <Link to="/cadastro" style={{ color: "inherit", textDecoration: "none" }}>Cadastro</Link>
@@ -52,9 +57,40 @@ export default function Header() {
         </nav>
       </div>
 
-      <button onClick={toggleTheme} style={{ background: "transparent", border: "none", cursor: "pointer", color: "inherit" }}>
-        {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        {isLoggedIn() && user && (
+          <>
+            <span style={{ fontWeight: "500" }}>
+              {user.nome || user.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "transparent",
+                border: "1px solid currentColor",
+                color: "inherit",
+                borderRadius: "6px",
+                padding: "6px 10px",
+                cursor: "pointer",
+                fontSize: "0.9em",
+              }}
+            >
+              Sair
+            </button>
+          </>
+        )}
+        <button
+          onClick={toggleTheme}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "inherit",
+          }}
+        >
+          {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+        </button>
+      </div>
     </header>
   );
 }
