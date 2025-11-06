@@ -1,6 +1,6 @@
 # **Smart Ranking**
 <div style="text-align: center;">
-  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="300"/>
+  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/>
 </div>
 
 ##  Sistema inteligente de ranking e recomendação de aplicativos da Google Play Store
