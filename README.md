@@ -1,6 +1,7 @@
 <p align="center">
+#<strong>Smart Ranking</strong>
   <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
-  <strong>#Smart Ranking</strong>
+
 </p>
 
 
