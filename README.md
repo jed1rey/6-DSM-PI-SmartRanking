@@ -1,4 +1,3 @@
-<h1 align="center">Smart Ranking</h1>
 <p align="center">
   <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
 </p>
