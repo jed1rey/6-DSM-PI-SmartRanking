@@ -1,7 +1,7 @@
-# **Smart Ranking**
-<div style="text-align: center;">
-  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/>
-</div>
+<p align="center">
+  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
+  <strong>Smart Ranking</strong>
+</p>
 
 
 
