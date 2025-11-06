@@ -3,6 +3,8 @@
   <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/>
 </div>
 
+
+
 ##  Sistema inteligente de ranking e recomendação de aplicativos da Google Play Store
 
 O **Smart Ranking** é uma aplicação que permite que usuários **explorem e ranqueiem aplicativos** da Google Play Store com base em critérios inteligentes e personalizados.  
