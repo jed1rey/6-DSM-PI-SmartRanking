@@ -3,7 +3,7 @@ import datetime
 from config import SECRET_KEY
 import sys
 
-# Define a chave secreta como uma constante em bytes, eliminando a inconsistência do .env
+# Define a chave secreta como uma constante em bytes
 CHAVE_SECRETA_FIXA = b'1234' 
 
 def _get_secret_key_bytes():
@@ -35,7 +35,7 @@ def gerar_token(user_id: int, user_email: str) -> str:
 
 def decodificar_token(token: str) -> dict:
     """
-    Decodifica o token JWT e retorna o payload, ou um dicionário de erro em caso de falha.
+    Decodifica o token JWT e retorna o payload, ou erro
     """
     chave_bytes = _get_secret_key_bytes()
     

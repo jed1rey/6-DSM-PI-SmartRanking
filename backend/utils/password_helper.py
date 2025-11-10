@@ -2,8 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 def hash_password(password):
     """
-    Gera o hash da senha usando Werkzeug's security (seguro e moderno).
-    Isso substitui o bcrypt e elimina o problema de compatibilidade com Python 3.10.
+    Gera o hash da senha usando Werkzeug's security
     """
     print(f"DEBUG: Hashing senha de {len(password)} caracteres usando Werkzeug.")
     

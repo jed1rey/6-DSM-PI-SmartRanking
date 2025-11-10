@@ -2,6 +2,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import psycopg2 # Importar para capturar exceção de conexão
 
+
+
 # Importa os Blueprints
 from routes.auth import auth_bp
 from routes.pesquisas import pesquisas_bp
@@ -52,7 +54,11 @@ def not_found(error):
 # Início da Aplicação
 # ------------------------------
 
-#para rodar localmente o comando: gunicorn app:app
+# O bloco if __name__ == "__main__": é usado APENAS para testes locais.
+# EM PRODUÇÃO NO RENDER, O GUNICORN IMPORTA E EXECUTA DIRETAMENTE A VARIÁVEL 'app'.
+# Portanto, a chamada app.run() deve ser removida ou comentada.
+#
+# Se for rodar localmente, você pode executar o comando: gunicorn app:app
 
 # if __name__ == "__main__":
 #     # app.run(debug=True, port=5000)  <-- COMENTADO/REMOVIDO PARA O DEPLOY DO RENDER
