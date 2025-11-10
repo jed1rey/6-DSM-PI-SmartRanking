@@ -1,65 +1,102 @@
+import os
+import joblib
+import sys
+import psycopg2 # Para capturar exceção de conexão
 from flask import Flask, jsonify
 from flask_cors import CORS
-import psycopg2 # Importar para capturar exceção de conexão
 
-
-
-# Importa os Blueprints
+# --- Importações de Lógica do Projeto ---
+from db import get_connection, create_tables 
 from routes.auth import auth_bp
 from routes.pesquisas import pesquisas_bp
+from routes.recomendacoes import recomendacoes_bp
+from utils.knn_processor import inicializar_modelos # Importa a função de injeção
 
-# Importa a função de conexão, que deve ler a DATABASE_URL
-from db import get_connection 
+# --- LÓGICA DE CARREGAMENTO DE MODELOS (Global) ---
+def carregar_modelos_knn():
+    """ 
+    Tenta carregar os modelos PKL e retorna os objetos.
+    Esta função é executada UMA VEZ quando o Gunicorn inicia o app.
+    """
+    
+    # Caminho base: assume que a pasta 'modelos' está na raiz do backend
+    # Usamos os.getcwd() pois o Gunicorn é executado da raiz do 'backend'
+    MODEL_DIR = os.path.join(os.getcwd(), "modelos") 
+    
+    # Se você moveu os PKLs para 'utils'
+    # MODEL_DIR = os.path.join(os.getcwd(), "utils")
 
-# Cria a instância da aplicação Flask
+    try:
+        if not os.path.isdir(MODEL_DIR):
+            print(f"❌ Erro: Diretório de modelos não encontrado. Caminho: {MODEL_DIR}", file=sys.stderr)
+            raise FileNotFoundError(f"Pasta de modelos não encontrada em: {MODEL_DIR}")
+
+        df_model = joblib.load(os.path.join(MODEL_DIR, "df_model_final.pkl"))
+        df_model_orig = joblib.load(os.path.join(MODEL_DIR, "df_model_orig.pkl"))
+        X_knn_df = joblib.load(os.path.join(MODEL_DIR, "X_knn_df.pkl"))
+        knn_model = joblib.load(os.path.join(MODEL_DIR, "knn_model.pkl"))
+
+        print("✅ Modelos KNN carregados com sucesso!")
+        return df_model, df_model_orig, X_knn_df, knn_model
+        
+    except Exception as e:
+        print(f"❌ Erro Crítico ao carregar modelos do joblib: {e}", file=sys.stderr)
+        # Retorna None para indicar falha
+        return None, None, None, None
+
+
+# --- Configuração Básica do App ---
 app = Flask(__name__)
 
-# Configuração de CORS para permitir requisições de frontend
+# Configuração de CORS (Permitindo todas as origens)
 CORS(app)
 
-# ------------------------------
-# Teste de conexão com o banco
-# ------------------------------
-try:
-    conn = get_connection()
-    if conn:
-        print("✅ Conexão com db smart_ranking realizada com sucesso!")
-        conn.close()
-except psycopg2.OperationalError as e:
-    print("❌ Falha ao conectar no banco (Verifique o .env e o status do DB):", e)
-    # Em produção, o Gunicorn tentará novamente.
-except Exception as e:
-      print("❌ Erro inesperado na conexão com o banco:", e)
+# Configurações de segurança (lendo do ambiente do Render)
+if os.environ.get("SECRET_KEY"):
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+else:
+    print("AVISO: SECRET_KEY não definida! O JWT não funcionará corretamente.", file=sys.stderr)
+    # Fallback caso a variável de ambiente não esteja definida no Render
+    app.config["SECRET_KEY"] = "super-secret-key-para-fallback" 
 
-# ------------------------------
-# Rotas
-# ------------------------------
+# --- Inicialização de Serviços (Executado na Carga do Gunicorn) ---
+
+# 1. Carrega e Injeta Modelos KNN
+df_model, df_model_orig, X_knn_df, knn_model = carregar_modelos_knn()
+if df_model is not None:
+    # Apenas inicializa o utilitário se os modelos carregarem
+    inicializar_modelos(df_model, df_model_orig, X_knn_df, knn_model)
+else:
+    print("⚠️ AVISO: Funcionalidades de Recomendação e Pesquisa NÃO estarão operacionais.", file=sys.stderr)
+
+
+# 2. Cria as tabelas ao iniciar o app (O Render executa isso na inicialização)
+try:
+    with app.app_context():
+        # Garante que o schema do DB esteja correto
+        create_tables() 
+except psycopg2.OperationalError as e:
+     print(f"❌ Falha ao conectar no banco (Verifique o .env/DATABASE_URL e o status do DB): {e}", file=sys.stderr)
+except Exception as e:
+    print(f"❌ Erro inesperado ao criar tabelas: {e}", file=sys.stderr)
+
+
+# --- Registro dos Blueprints de Rotas ---
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(pesquisas_bp, url_prefix="/api")
+app.register_blueprint(recomendacoes_bp, url_prefix="/api") # Rota de recomendação adicionada
 
+
+# --- Rotas de Saúde e Erros ---
 @app.route("/")
 def home():
     """Rota de saúde da API."""
-    return "Backend Smart Ranking! 🚀"
+    return jsonify({"message": "API Smart Ranking está Online!"}), 200
 
-# ------------------------------
-# Tratamento de Erros
-# ------------------------------
 @app.errorhandler(404)
 def not_found(error):
     # Retorna o erro em formato JSON (padrão de API)
     return jsonify({"error": "Recurso não encontrado"}), 404
 
-# ------------------------------
-# Início da Aplicação
-# ------------------------------
-
-# O bloco if __name__ == "__main__": é usado APENAS para testes locais.
-# EM PRODUÇÃO NO RENDER, O GUNICORN IMPORTA E EXECUTA DIRETAMENTE A VARIÁVEL 'app'.
-# Portanto, a chamada app.run() deve ser removida ou comentada.
-#
-# Se for rodar localmente, você pode executar o comando: gunicorn app:app
-
-# if __name__ == "__main__":
-#     # app.run(debug=True, port=5000)  <-- COMENTADO/REMOVIDO PARA O DEPLOY DO RENDER
-#     pass
+# NOTA: O bloco if __name__ == "__main__": é removido
+# O Gunicorn (usado pelo Render) importa a variável 'app' diretamente.
