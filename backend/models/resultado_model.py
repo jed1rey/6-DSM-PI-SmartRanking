@@ -1,5 +1,6 @@
 from db import get_connection
-from typing import Dict, List # <--- CORREÇÃO AQUI
+from typing import Dict, List
+import sys
 
 def salvar_resultados(pesquisa_id: int, resultados: Dict):
     """
@@ -53,12 +54,60 @@ def salvar_resultados(pesquisa_id: int, resultados: Dict):
     """
     
     try:
-        cur.executemany(query, registros_para_inserir)
-        conn.commit()
+        if registros_para_inserir:
+            cur.executemany(query, registros_para_inserir)
+            conn.commit()
     except Exception as e:
         conn.rollback()
-        print(f"Erro no DB ao salvar resultados de pesquisa: {e}")
+        print(f"Erro no DB ao salvar resultados de pesquisa: {e}", file=sys.stderr)
         raise
+    finally:
+        cur.close()
+        conn.close()
+
+
+def get_resultados_by_pesquisa_id(pesquisa_id: int) -> List[Dict]:
+    """
+    Busca todos os resultados (Top10 e KNN) associados a um ID de pesquisa.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT * FROM resultados_pesquisa
+        WHERE pesquisa_id = %s
+        ORDER BY tipo_resultado, posicao;
+    """
+    try:
+        cur.execute(query, (pesquisa_id,))
+        resultados = cur.fetchall()
+        return resultados
+    except Exception as e:
+        print(f"Erro no DB ao buscar resultados por ID de pesquisa: {e}", file=sys.stderr)
+        return []
+    finally:
+        cur.close()
+        conn.close()
+
+def get_todos_resultados_by_user_id(usuario_id: int) -> List[Dict]:
+    """
+    NOVO: Busca TODOS os resultados (Top10/KNN) de TODAS as pesquisas de um usuário.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT r.*, p.criado_em as data_pesquisa
+        FROM resultados_pesquisa r
+        JOIN pesquisas p ON r.pesquisa_id = p.id
+        WHERE p.usuario_id = %s
+        ORDER BY p.criado_em DESC, r.tipo_resultado, r.posicao;
+    """
+    try:
+        cur.execute(query, (usuario_id,))
+        resultados = cur.fetchall()
+        return resultados
+    except Exception as e:
+        print(f"Erro no DB ao buscar TODOS os resultados por ID de usuário: {e}", file=sys.stderr)
+        return []
     finally:
         cur.close()
         conn.close()

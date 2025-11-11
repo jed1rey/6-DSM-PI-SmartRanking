@@ -17,8 +17,7 @@ def criar_pesquisa(
     conn = get_connection()
     cur = conn.cursor()
     try:
-        # AQUI GARANTIMOS QUE O NÚMERO DE COLUNAS E PARÂMETROS BATE
-        # São 9 colunas no total, excluindo o 'id' e 'criado_em'
+        # Garante que o número de colunas e parâmetros bate (9 colunas + 1 NOW())
         cur.execute("""
             INSERT INTO pesquisas (
                 usuario_id, sentiment, category, min_rating, app_type, app_size, 
@@ -34,7 +33,6 @@ def criar_pesquisa(
         return pesquisa_id
     except Exception as e:
         conn.rollback()
-        # O log agora deve mostrar o erro real do PostgreSQL, se houver
         print(f"Erro ao criar pesquisa (filtros) no DB: {e}") 
         return None
     finally:
@@ -47,7 +45,6 @@ def get_all_pesquisas_by_user(usuario_id):
     """
     conn = get_connection()
     cur = conn.cursor()
-    # Seleção de todas as colunas relevantes
     cur.execute("""
         SELECT *
         FROM pesquisas 
@@ -98,3 +95,26 @@ def get_all_pesquisas():
     cur.close()
     conn.close()
     return pesquisas
+
+def get_latest_pesquisa_id_by_user(usuario_id: int):
+    """
+    NOVO: Busca o ID da pesquisa mais recente feita por um usuário.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id 
+            FROM pesquisas
+            WHERE usuario_id = %s
+            ORDER BY criado_em DESC
+            LIMIT 1
+        """, (usuario_id,))
+        resultado = cur.fetchone()
+        return resultado['id'] if resultado else None
+    except Exception as e:
+        print(f"Erro no DB ao buscar última pesquisa por ID de usuário: {e}")
+        return None
+    finally:
+        cur.close()
+        conn.close()

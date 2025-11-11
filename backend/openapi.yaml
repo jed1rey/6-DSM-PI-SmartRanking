@@ -1,144 +1,300 @@
 openapi: 3.0.0
 info:
-  title: Smart Ranking API
-  description: API para autenticação de usuários e criação/consulta de histórico de pesquisas no sistema Smart Ranking.
-  version: 1.0.0
+  title: API Smart Ranking
+  description: API Flask para autenticação, processamento de filtros de Apps, execução de modelo KNN para ranking e consulta de histórico de pesquisas.
+  version: "1.1.0"
 servers:
   - url: http://127.0.0.1:5000
     description: Servidor de Desenvolvimento Local
+  - url: https://seu-app-no-render.onrender.com
+    description: Servidor de Produção (Render)
+
+# 1. Definição das Tags (Grupos de Endpoints)
 tags:
   - name: Autenticação
-    description: Registro e Login de Usuários
+    description: Endpoints para registro e login de usuários (obtenção de token JWT).
   - name: Usuários (Público)
-    description: Consulta pública de dados básicos de usuários
-  - name: Pesquisas
-    description: Criação de novas pesquisas (Protegida) e consulta ao histórico (Pública)
+    description: Endpoints públicos para consultar dados de usuários.
+  - name: Pesquisas (KNN)
+    description: Endpoint principal para executar o ranking (Protegido por JWT).
+  - name: Histórico de Filtros (Público)
+    description: Endpoints públicos para consultar os *filtros* usados em pesquisas passadas.
+  - name: Histórico de Resultados (Público)
+    description: Endpoints públicos para consultar os *resultados* (Top10/KNN) gerados.
 
+# 2. Definição do Esquema de Segurança (JWT)
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Token JWT obtido na rota /auth/login.
+
+  # 3. Definição dos Schemas (Modelos de Dados)
   schemas:
-    UsuarioInput:
+    
+    # Schemas de Erro
+    Error400:
       type: object
       properties:
-        nome:
+        error:
           type: string
-          example: João da Silva
-        data_nascimento:
-          type: string
-          format: date
-          example: 1995-10-25
-        email:
-          type: string
-          format: email
-          example: joao.silva@exemplo.com
-        senha:
-          type: string
-          example: senhaforte123
-      required:
-        - nome
-        - data_nascimento
-        - email
-        - senha
-    LoginInput:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          example: joao.silva@exemplo.com
-        senha:
-          type: string
-          example: senhaforte123
-      required:
-        - email
-        - senha
-    TokenOutput:
-      type: object
-      properties:
-        token:
-          type: string
-          description: JWT Bearer Token para acesso a rotas protegidas.
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOi...
-    PesquisaInput:
-      type: object
-      properties:
-        categoria:
-          type: string
-          example: Jogos
-        genero:
-          type: string
-          example: Estrategia
-        preco_opcao:
-          type: string
-          enum: [gratuito, pago_ate_10, pago_acima_10]
-          example: gratuito
-        ordenacao:
-          type: string
-          enum: [score_inteligente, rating, popularidade, custo_beneficio]
-          example: score_inteligente
-      required:
-        - categoria
-        - genero
-        - preco_opcao
-    PesquisaOutput:
-      type: object
-      properties:
-        id:
-          type: integer
-        usuario_id:
-          type: integer
-        categoria:
-          type: string
-        genero:
-          type: string
-        criado_em:
-          type: string
-          format: date-time
-    ResultadoRanking:
-      type: object
-      properties:
-        app_nome:
-          type: string
-        score:
-          type: number
-          format: float
-    PesquisaCriadaOutput:
+          example: "Todos os 8 campos de filtro... são obrigatórios."
+    Error401:
       type: object
       properties:
         message:
           type: string
-        pesquisa_id:
-          type: integer
-        top_5_resultados:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResultadoRanking'
-    UsuarioDetalhe:
+          example: "Token é obrigatório! (Bearer token não encontrado...)"
+    Error401Auth: # Erro específico do Login
       type: object
       properties:
-        id:
-          type: integer
+        error:
+          type: string
+          example: "Credenciais inválidas"
+    Error404:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Recurso não encontrado."
+    Error500:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Erro interno ao processar a pesquisa: [Erro]"
+
+    # Schemas de Autenticação
+    UsuarioInput:
+      type: object
+      description: Dados necessários para registrar um novo usuário.
+      properties:
         nome:
           type: string
-        email:
-          type: string
-          format: email
+          example: "João da Silva"
         data_nascimento:
           type: string
           format: date
+          example: "1995-10-25"
+        email:
+          type: string
+          format: email
+          example: "joao.silva@teste.com"
+        senha:
+          type: string
+          format: password
+          example: "minhasenhaforte123"
+      required: [nome, data_nascimento, email, senha]
+    
+    LoginInput:
+      type: object
+      description: Credenciais para login.
+      properties:
+        email:
+          type: string
+          format: email
+          example: "joao.silva@teste.com"
+        senha:
+          type: string
+          format: password
+          example: "minhasenhaforte123"
+      required: [email, senha]
+      
+    TokenOutput:
+      type: object
+      description: Resposta do login bem-sucedido.
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          
+    UsuarioOutput:
+      type: object
+      description: Dados públicos de um usuário.
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: "João da Silva"
+        email:
+          type: string
+          format: email
+          example: "joao.silva@teste.com"
+        data_nascimento:
+          type: string
+          format: date
+          example: "1995-10-25"
         criado_em:
           type: string
           format: date-time
+          example: "2025-11-09T19:50:35"
 
+    # Schema da Tabela 'pesquisas' (Histórico de Filtros)
+    PesquisaHistoricoOutput:
+      type: object
+      description: O registro dos 9 filtros usados em uma pesquisa.
+      properties:
+        id:
+          type: integer
+          example: 30
+        usuario_id:
+          type: integer
+          example: 1
+        sentiment:
+          type: number
+          format: float
+          example: 1.0
+        category:
+          type: string
+          example: "ART_AND_DESIGN"
+        min_rating:
+          type: integer
+          example: 4
+        app_type:
+          type: string
+          example: "Free"
+        app_size:
+          type: integer
+          example: 2
+        min_installs:
+          type: integer
+          example: 4
+        content_rating:
+          type: integer
+          example: 1
+        android_version:
+          type: integer
+          example: 5
+        ordenacao:
+          type: string
+          example: "Nota_Final"
+        criado_em:
+          type: string
+          format: date-time
+          
+    # Schema da Tabela 'resultados_pesquisa'
+    ResultadoOutput:
+      type: object
+      description: Um único resultado de app (Top10 ou KNN).
+      properties:
+        id:
+          type: integer
+        pesquisa_id:
+          type: integer
+        app_nome:
+          type: string
+        categoria:
+          type: string
+        rating:
+          type: number
+          format: float
+        installs:
+          type: integer
+        preco:
+          type: number
+          format: float
+        tipo_resultado:
+          type: string
+          enum: [TOP10_RANKING, KNN_RECOMENDACAO]
+        posicao:
+          type: integer
+        nota_final:
+          type: number
+          format: float
+        score_knn:
+          type: number
+          format: float
+        motivo_knn:
+          type: string
+          nullable: true
+          
+    # Schema do Input (Body) do POST /api/pesquisas
+    PesquisaInput:
+      type: object
+      description: Os 9 filtros exatos (strings) enviados pelo frontend.
+      properties:
+        sentiment:
+          type: string
+          enum: ["POSITIVO", "NEUTRO", "NEGATIVO"]
+        category:
+          type: string
+          example: "ART_AND_DESIGN"
+        rating:
+          type: string
+          enum: ["1 estrela", "2 estrelas", "3 estrelas", "4 estrelas", "5 estrelas"]
+        type:
+          type: string
+          enum: ["GRÁTIS", "PAGO"]
+        size:
+          type: string
+          enum: ["PEQUENO (ATÉ 10 MB)", "MÉDIO ( ENTRE 10 A 50 MB)", "GRANDE (MAIOR QUE 50 MB)"]
+        installs:
+          type: string
+          enum: ["0 – 9,999", "10,000 – 99,999", "100,000 – 999,999", "1,000,000 – 9,999,999", "10,000,000+"]
+        content_rating:
+          type: string
+          enum: ["LIVRE", "LIVRE ACIMA DE 10 ANOS", "ADOLESCENTE", "ACIMA DE 17 ANOS", "ADULTOS +18"]
+        android_version:
+          type: string
+          enum: ["ANDROID VERSÃO ATÉ 2.0", "ANDROID VERSÃO ATÉ 3.0", "ANDROID VERSÃO ATÉ 4.0", "ANDROID VERSÃO ATÉ 5.0", "ANDROID VERSÃO ATÉ 6.0", "ANDROID VERSÃO ATÉ 7.0", "ANDROID VERSÃO ACIMA DE 8.0"]
+        ordenacao:
+          type: string
+          example: "Nota_Final"
+      required: [sentiment, category, rating, type, size, installs, content_rating, android_version]
+
+    # Schema da Resposta (Body) do POST /api/pesquisas
+    PesquisaGeradaOutput:
+      type: object
+      description: Resposta da criação de pesquisa bem-sucedida.
+      properties:
+        message:
+          type: string
+          example: "Pesquisa e Ranking gerados com sucesso!"
+        pesquisa_id:
+          type: integer
+          example: 30
+        top10_ranking:
+          type: array
+          items:
+            type: object 
+            properties:
+              App:
+                type: string
+              Nota_Final:
+                type: number
+        recomendacoes_knn:
+          type: array
+          items:
+            type: object
+            properties:
+              App:
+                type: string
+                
+    # Schema: Resposta da Última Pesquisa
+    LatestResultadoOutput:
+      type: object
+      description: Os resultados (Top10/KNN) da pesquisa mais recente de um usuário.
+      properties:
+        ultima_pesquisa_id:
+          type: integer
+          example: 30
+        resultados:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResultadoOutput'
+
+# 4. Definição dos Caminhos (Endpoints)
 paths:
+
+  # --- Autenticação ---
   /auth/register:
     post:
       tags: [Autenticação]
-      summary: Registra um novo usuário no sistema.
+      summary: Registra um novo usuário.
       requestBody:
         required: true
         content:
@@ -148,24 +304,23 @@ paths:
       responses:
         '201':
           description: Usuário registrado com sucesso.
+        '400':
+          description: Dados de registro incompletos.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user_id:
-                    type: integer
-        '400':
-          description: Dados incompletos.
+                $ref: '#/components/schemas/Error400' # <-- CORRIGIDO
         '409':
-          description: Email já cadastrado ou erro de integridade no DB.
+          description: 'Falha ao registrar (ex: email já existe).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400' 
 
   /auth/login:
     post:
       tags: [Autenticação]
-      summary: Autentica um usuário e retorna um JWT.
+      summary: Autentica um usuário e retorna um token JWT.
       requestBody:
         required: true
         content:
@@ -181,25 +336,30 @@ paths:
                 $ref: '#/components/schemas/TokenOutput'
         '401':
           description: Credenciais inválidas.
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401Auth' # <-- CORRIGIDO
+          
+  # --- Usuários (Público) ---
   /auth/users:
     get:
       tags: [Usuários (Público)]
-      summary: Lista todos os usuários cadastrados.
+      summary: Retorna a lista de todos os usuários cadastrados.
       responses:
         '200':
-          description: Lista de usuários retornada com sucesso.
+          description: Lista de usuários.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UsuarioDetalhe'
-
+                  $ref: '#/components/schemas/UsuarioOutput'
+                  
   /auth/users/{user_id}:
     get:
       tags: [Usuários (Público)]
-      summary: Obtém um usuário específico por ID.
+      summary: Retorna um usuário específico por ID.
       parameters:
         - name: user_id
           in: path
@@ -208,20 +368,26 @@ paths:
             type: integer
       responses:
         '200':
-          description: Usuário encontrado.
+          description: Dados do usuário.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsuarioDetalhe'
+                $ref: '#/components/schemas/UsuarioOutput'
         '404':
           description: Usuário não encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404' 
 
+  # --- Pesquisas (POST Protegido) ---
   /api/pesquisas:
     post:
-      tags: [Pesquisas]
-      summary: Cria uma nova pesquisa e simula o ranking.
+      tags: [Pesquisas (KNN)]
+      summary: Executa o KNN e salva o histórico de pesquisa.
+      description: Rota protegida. Requer o token JWT. Recebe 9 filtros (strings) e retorna o Top10 e as 5 recomendações KNN.
       security:
-        - bearerAuth: []
+        - bearerAuth: [] 
       requestBody:
         required: true
         content:
@@ -230,30 +396,49 @@ paths:
               $ref: '#/components/schemas/PesquisaInput'
       responses:
         '201':
-          description: Pesquisa criada e ranking simulado com sucesso.
+          description: Pesquisa gerada e salva com sucesso.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PesquisaCriadaOutput'
+                $ref: '#/components/schemas/PesquisaGeradaOutput'
+        '400':
+          description: Erro de Tradução (JSON enviado incorretamente).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
         '401':
-          description: Não autorizado (Token ausente ou inválido).
+          description: Token JWT ausente ou inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+        '500':
+          description: Erro interno (Falha no KNN ou DB).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error500'
+                
+    # --- Rota GET /api/pesquisas (Listar todos os filtros) ---
     get:
-      tags: [Pesquisas]
-      summary: Obtém o histórico COMPLETO de todas as pesquisas do sistema (Público).
+      tags: [Histórico de Filtros (Público)]
+      summary: Retorna o histórico COMPLETO de filtros de TODAS as pesquisas.
       responses:
         '200':
-          description: Lista de todas as pesquisas retornada com sucesso.
+          description: Lista de filtros de pesquisa (da tabela 'pesquisas').
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PesquisaOutput'
+                  $ref: '#/components/schemas/PesquisaHistoricoOutput'
 
+  # --- Histórico de Filtros (GET Público) ---
   /api/pesquisas/user/{usuario_id}:
     get:
-      tags: [Pesquisas]
-      summary: Obtém o histórico de pesquisas de um usuário específico (Público).
+      tags: [Histórico de Filtros (Público)]
+      summary: Retorna o histórico de *filtros* de um usuário.
       parameters:
         - name: usuario_id
           in: path
@@ -262,20 +447,24 @@ paths:
             type: integer
       responses:
         '200':
-          description: Histórico de pesquisas do usuário retornado.
+          description: Lista de filtros de pesquisa (da tabela 'pesquisas').
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PesquisaOutput'
+                  $ref: '#/components/schemas/PesquisaHistoricoOutput'
         '404':
-          description: Usuário não encontrado.
-
+          description: Nenhuma pesquisa encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404' 
+                  
   /api/pesquisas/{pesquisa_id}:
     get:
-      tags: [Pesquisas]
-      summary: Obtém uma pesquisa específica por ID (Público).
+      tags: [Histórico de Filtros (Público)]
+      summary: Retorna um registro de *filtro* específico por ID da pesquisa.
       parameters:
         - name: pesquisa_id
           in: path
@@ -284,10 +473,91 @@ paths:
             type: integer
       responses:
         '200':
-          description: Detalhes da pesquisa retornados.
+          description: Dados do filtro da pesquisa.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PesquisaOutput'
+                $ref: '#/components/schemas/PesquisaHistoricoOutput'
         '404':
           description: Pesquisa não encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404' 
+
+  # --- Histórico de Resultados (GET Público) ---
+  /api/resultados/user/{usuario_id}:
+    get:
+      tags: [Histórico de Resultados (Público)]
+      summary: Retorna *todos* os resultados (Top10/KNN) de *todas* as pesquisas de um usuário.
+      parameters:
+        - name: usuario_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de resultados (da tabela 'resultados_pesquisa').
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResultadoOutput'
+        '404':
+          description: Nenhum resultado encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404' 
+          
+  /api/resultados/user/{usuario_id}/latest:
+    get:
+      tags: [Histórico de Resultados (Público)]
+      summary: Retorna os resultados (Top10/KNN) da *última* pesquisa de um usuário.
+      parameters:
+        - name: usuario_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resultados da última pesquisa encontrados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestResultadoOutput' 
+        '404':
+          description: Nenhuma pesquisa encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404' 
+
+  /api/resultados/{pesquisa_id}:
+    get:
+      tags: [Histórico de Resultados (Público)]
+      summary: Retorna os resultados (Top10/KNN) de uma pesquisa específica.
+      parameters:
+        - name: pesquisa_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de resultados (da tabela 'resultados_pesquisa').
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResultadoOutput'
+        '404':
+          description: Resultados não encontrados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
