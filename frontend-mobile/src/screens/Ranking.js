@@ -1,6 +1,13 @@
-import React from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+// src/screens/Ranking.js
+import React from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  ImageBackground,
+} from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Ranking() {
   const { colors, darkMode } = useTheme();
@@ -13,7 +20,8 @@ export default function Ranking() {
       tipo: "Gratuito",
       genero: "Entretenimento",
       faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"
+      icone:
+        "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
     },
     {
       nome: "Deezer",
@@ -22,7 +30,8 @@ export default function Ranking() {
       tipo: "Gratuito",
       genero: "Entretenimento",
       faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/4/48/Deezer_logo.svg"
+      icone:
+        "https://upload.wikimedia.org/wikipedia/commons/4/48/Deezer_logo.svg",
     },
     {
       nome: "Amazon Music",
@@ -31,7 +40,8 @@ export default function Ranking() {
       tipo: "Pago",
       genero: "Entretenimento",
       faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Amazon_Music_logo.svg"
+      icone:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f1/Amazon_Music_logo.svg",
     },
     {
       nome: "YouTube",
@@ -40,7 +50,8 @@ export default function Ranking() {
       tipo: "Gratuito",
       genero: "Entretenimento",
       faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png"
+      icone:
+        "https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png",
     },
     {
       nome: "TikTok",
@@ -49,7 +60,8 @@ export default function Ranking() {
       tipo: "Gratuito",
       genero: "Entretenimento",
       faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/en/6/6b/TikTok_logo.svg"
+      icone:
+        "https://upload.wikimedia.org/wikipedia/en/6/6b/TikTok_logo.svg",
     },
   ];
 
@@ -62,92 +74,124 @@ export default function Ranking() {
   };
 
   return (
-    <ScrollView style={{
-      flex: 1,
-      backgroundColor: colors.background,
-      padding: 20,
-    }}>
-      <Text style={{
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 20,
-        color: colors.text,
-      }}>
-        Ranking Top 10 Apps
-      </Text>
+    <ImageBackground
+      source={require("../../assets/background.png")} // mesmo fundo padrão
+      style={{ flex: 1, width: "100%", height: "100%" }}
+      resizeMode="cover"
+      blurRadius={1}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: 20,
+          backgroundColor: darkMode
+            ? "rgba(0,0,0,0.5)"
+            : "rgba(255,255,255,0.6)",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: "bold",
+            textAlign: "center",
+            marginBottom: 25,
+            color: colors.text,
+          }}
+        >
+          Ranking Top 10 Apps
+        </Text>
 
-      <View style={{
-        width: '100%',
-        maxWidth: 900,
-        marginHorizontal: 'auto',
-      }}>
-        {topApps.map((app, index) => {
-          const score = calculateScore(index, topApps.length);
-          
-          return (
-            <View key={index} style={{
-              width: '100%',
-              padding: 15,
-              borderRadius: 10,
-              backgroundColor: colors.card,
-              marginBottom: 15,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: darkMode ? 0.7 : 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
-              <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 15, flex: 1 }}>
-                <Image
-                  source={{ uri: app.icone }}
-                  style={{ width: 50, height: 50, borderRadius: 10 }}
-                />
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-                    fontWeight: 'bold',
-                    color: colors.text,
-                    fontSize: 16,
-                  }}>
-                    {index + 1}º {app.nome}
-                  </Text>
-                  <Text style={{
-                    fontSize: 13,
-                    color: colors.text,
-                    marginTop: 2,
-                  }}>
-                    {app.categoria} | {app.tipo} | {app.genero} | {app.faixa}
-                  </Text>
-                  <Text style={{
-                    fontSize: 13,
-                    color: colors.text,
-                    marginTop: 2,
-                  }}>
-                    Instalações: {app.instalacoes}
+        <View style={{ width: "100%" }}>
+          {topApps.map((app, index) => {
+            const score = calculateScore(index, topApps.length);
+
+            return (
+              <View
+                key={index}
+                style={{
+                  width: "100%",
+                  padding: 15,
+                  borderRadius: 10,
+                  backgroundColor: darkMode
+                    ? "rgba(33,33,33,0.8)"
+                    : "rgba(255,255,255,0.9)",
+                  marginBottom: 15,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: darkMode ? 0.7 : 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                {/* Informações do App */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 15,
+                    flex: 1,
+                  }}
+                >
+                  <Image
+                    source={{ uri: app.icone }}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 10,
+                      backgroundColor: "#fff",
+                    }}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: colors.text,
+                        fontSize: 16,
+                      }}
+                    >
+                      {index + 1}º {app.nome}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: colors.text,
+                        marginTop: 2,
+                      }}
+                    >
+                      {app.categoria} | {app.tipo} | {app.genero} | {app.faixa}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: colors.text,
+                        marginTop: 2,
+                      }}
+                    >
+                      Instalações: {app.instalacoes}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Pontuação */}
+                <View style={{ minWidth: 60, alignItems: "flex-end" }}>
+                  <Text
+                    style={{
+                      fontSize: 24,
+                      fontWeight: "bold",
+                      color: darkMode ? "#81c995" : "#34a853",
+                    }}
+                  >
+                    {score}
                   </Text>
                 </View>
               </View>
-              
-              <View style={{
-                minWidth: 60,
-                alignItems: 'flex-end',
-              }}>
-                <Text style={{
-                  fontSize: 24,
-                  fontWeight: 'bold',
-                  color: darkMode ? '#81c995' : '#34a853',
-                }}>
-                  {score}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-    </ScrollView>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </ImageBackground>
   );
 }

@@ -1,116 +1,150 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
+// src/screens/Perfil.js
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ImageBackground,
+} from "react-native";
+import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 
-export default function Perfil() {
+export default function Perfil({ navigation }) {
   const { colors, darkMode } = useTheme();
+  const { user, signOut } = useAuth();
 
-  const userData = { 
-    nome: "João Silva", 
-    email: "joao@email.com" 
+  const handleLogout = async () => {
+    await signOut();
+    navigation.navigate("Home");
+    Alert.alert("Logout", "Você saiu da conta.");
   };
 
-  const history = [
-    { id: 1, nome: "Ranking 01" },
-    { id: 2, nome: "Ranking 02" },
-    { id: 3, nome: "Ranking 03" },
-    { id: 4, nome: "Ranking 04" },
-    { id: 5, nome: "Ranking 05" },
-  ];
-
-  return (
-    <ScrollView style={{
-      flex: 1,
-      padding: 20,
-      backgroundColor: colors.background,
-    }}>
-      <Text style={{
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 20,
-        marginTop: 20,
-        color: colors.text,
-      }}>
-        Perfil do Usuário
-      </Text>
-
-     
-      <View style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 10,
-        marginBottom: 30,
-      }}>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{
-            fontSize: 16,
-            color: colors.text,
-          }}>
-            <Text style={{ fontWeight: 'bold' }}>Nome:</Text> {userData.nome}
+  // Quando não há usuário logado
+  if (!user) {
+    return (
+      <ImageBackground
+        source={require("../../assets/background.png")}
+        style={{ flex: 1, width: "100%", height: "100%" }}
+        resizeMode="cover"
+        blurRadius={1}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: darkMode
+              ? "rgba(0,0,0,0.5)"
+              : "rgba(255,255,255,0.6)",
+            padding: 20,
+          }}
+        >
+          <Text
+            style={{
+              color: colors.text,
+              textAlign: "center",
+              fontSize: 18,
+            }}
+          >
+            Nenhum usuário logado.
           </Text>
-          <Text style={{
-            fontSize: 16,
+        </View>
+      </ImageBackground>
+    );
+  }
+
+  // Quando há usuário logado
+  return (
+    <ImageBackground
+      source={require("../../assets/background.png")}
+      style={{ flex: 1, width: "100%", height: "100%" }}
+      resizeMode="cover"
+      blurRadius={1}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          paddingHorizontal: 30,
+          paddingVertical: 60,
+          backgroundColor: darkMode
+            ? "rgba(0,0,0,0.5)"
+            : "rgba(255,255,255,0.6)",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 36,
+            fontWeight: "bold",
+            textAlign: "center",
+            marginBottom: 35,
             color: colors.text,
-          }}>
-            <Text style={{ fontWeight: 'bold' }}>Email:</Text> {userData.email}
+          }}
+        >
+          Perfil
+        </Text>
+
+        <View style={{ alignItems: "center", marginBottom: 40 }}>
+          <Text
+            style={{
+              fontSize: 22,
+              color: colors.text,
+              marginBottom: 10,
+              textAlign: "center",
+            }}
+          >
+            <Text style={{ fontWeight: "bold" }}>Nome: </Text>
+            {user.nome ?? "—"}
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 20,
+              color: colors.text,
+              marginBottom: 10,
+              textAlign: "center",
+            }}
+          >
+            <Text style={{ fontWeight: "bold" }}>Email: </Text>
+            {user.email ?? "—"}
+          </Text>
+
+          <Text
+            style={{
+              fontSize: 18,
+              color: colors.text,
+              textAlign: "center",
+            }}
+          >
+            <Text style={{ fontWeight: "bold" }}>Data de nascimento: </Text>
+            {user.data_nascimento
+              ? new Date(user.data_nascimento).toLocaleDateString("pt-BR")
+              : "—"}
           </Text>
         </View>
 
         <TouchableOpacity
+          onPress={handleLogout}
           style={{
-            marginTop: 10,
-            padding: 10,
-            paddingHorizontal: 20,
-            background: darkMode ? '#1a73e8' : '#1976d2',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontWeight: 'bold',
+            backgroundColor: "#d32f2f",
+            padding: 14,
+            borderRadius: 8,
+            alignItems: "center",
           }}
         >
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Alterar Dados</Text>
-        </TouchableOpacity>
-      </View>
-
-      
-      <View style={{ marginTop: 30, width: '100%' }}>
-        <Text style={{
-          color: colors.text,
-          textAlign: 'center',
-          fontSize: 20,
-          fontWeight: 'bold',
-          marginBottom: 20,
-        }}>
-          Histórico de Rankings
-        </Text>
-
-        {history.map((item) => (
-          <TouchableOpacity
-            key={item.id}
+          <Text
             style={{
-              padding: 10,
-              margin: 10,
-              marginHorizontal: 0,
-              borderRadius: 6,
-              backgroundColor: darkMode ? '#3c3c3c' : '#f5f5f5',
-              cursor: 'pointer',
-              transition: 'background 0.3s ease',
-              textAlign: 'center',
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: "bold",
             }}
           >
-            <Text style={{
-              color: colors.text,
-              textAlign: 'center',
-              fontWeight: '500',
-            }}>
-              {item.nome}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ScrollView>
+            Sair
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </ImageBackground>
   );
 }
