@@ -7,6 +7,7 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import RNPickerSelect from "react-native-picker-select";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
@@ -16,6 +17,21 @@ export default function Pesquisa({ navigation }) {
   const { colors, darkMode } = useTheme();
   const { token } = useAuth();
   const [form, setForm] = useState({});
+
+  // Reset automático do formulário ao voltar da tela Ranking
+  useFocusEffect(
+    React.useCallback(() => {
+      const resetParam = navigation
+        .getState()
+        ?.routes?.find((r) => r.name === "Pesquisa")?.params?.resetForm;
+
+      if (resetParam) {
+        console.log("🧹 Formulário resetado automaticamente");
+        setForm({});
+        navigation.setParams({ resetForm: false }); // limpa o parâmetro
+      }
+    }, [navigation])
+  );
 
   // Opções de seleção
   const sentiments = [
@@ -104,7 +120,7 @@ export default function Pesquisa({ navigation }) {
     { label: "Versão acima de 8.0", value: "ANDROID VERSÃO ACIMA DE 8.0" },
   ];
 
-  // Envio e busca dos resultados
+  // Envio da pesquisa e resultado
   const handleSubmit = async () => {
     const required = [
       "sentiment",
@@ -133,7 +149,7 @@ export default function Pesquisa({ navigation }) {
       installs: form.installs,
       content_rating: form.content_rating,
       android_version: form.android_version,
-      ordenacao: "Nota_Final", // 🔹 fixo conforme documentação
+      ordenacao: "Nota_Final",
     };
 
     try {
@@ -145,8 +161,8 @@ export default function Pesquisa({ navigation }) {
         },
       });
 
-      console.log(" JSON enviado:", payload);
-      console.log(" Resposta POST:", postResp.data);
+      console.log("✅ JSON enviado:", payload);
+      console.log("✅ Resposta POST:", postResp.data);
 
       const pesquisaId = postResp.data?.pesquisa_id;
       if (!pesquisaId) {
@@ -154,7 +170,6 @@ export default function Pesquisa({ navigation }) {
         return;
       }
 
-      // 🔥 Buscar o resultado dessa pesquisa específica
       const getUrl = `https://six-dsm-pi-smartranking.onrender.com/api/resultados/${pesquisaId}`;
       const getResp = await axios.get(getUrl, {
         headers: { Authorization: `Bearer ${token}` },
@@ -165,7 +180,7 @@ export default function Pesquisa({ navigation }) {
       Alert.alert("Sucesso", "Ranking gerado com sucesso!");
       navigation.navigate("Ranking", { rankingData: getResp.data });
     } catch (err) {
-      console.error(" Erro pesquisa:", err.response?.data ?? err.message);
+      console.error("Erro pesquisa:", err.response?.data ?? err.message);
       Alert.alert("Erro", "Falha ao gerar ranking. Verifique o backend.");
     }
   };
@@ -198,6 +213,7 @@ export default function Pesquisa({ navigation }) {
           Pesquisa de Apps
         </Text>
 
+        {/* Caixas de seleção arredondadas */}
         {[
           { key: "sentiment", label: "Sentimento", items: sentiments },
           { key: "category", label: "Categoria", items: categories },
@@ -225,14 +241,16 @@ export default function Pesquisa({ navigation }) {
             </Text>
             <RNPickerSelect
               onValueChange={(value) => setForm({ ...form, [key]: value })}
+              value={form[key] || null}
               items={items}
               placeholder={{ label: `Selecione ${label.toLowerCase()}`, value: null }}
               style={{
                 inputAndroid: {
                   backgroundColor: colors.inputBg,
                   color: colors.text,
-                  padding: 12,
-                  borderRadius: 6,
+                  paddingVertical: 14,
+                  paddingHorizontal: 15,
+                  borderRadius: 12, 
                   borderWidth: 1,
                   borderColor: colors.inputBorder,
                   fontFamily: colors.fontFamily,
@@ -240,8 +258,9 @@ export default function Pesquisa({ navigation }) {
                 inputIOS: {
                   backgroundColor: colors.inputBg,
                   color: colors.text,
-                  padding: 12,
-                  borderRadius: 6,
+                  paddingVertical: 14,
+                  paddingHorizontal: 15,
+                  borderRadius: 12,
                   borderWidth: 1,
                   borderColor: colors.inputBorder,
                   fontFamily: colors.fontFamily,
@@ -256,7 +275,7 @@ export default function Pesquisa({ navigation }) {
           style={{
             backgroundColor: "#fbc02d",
             padding: 14,
-            borderRadius: 8,
+            borderRadius: 10,
             alignItems: "center",
             marginTop: 10,
           }}
