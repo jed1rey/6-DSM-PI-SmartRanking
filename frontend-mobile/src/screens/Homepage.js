@@ -15,19 +15,21 @@ export default function Homepage({ navigation }) {
 
   return (
     <ImageBackground
-      source={require("../../assets/background.png")} // sua imagem de fundo
+      source={require("../../assets/background.png")} 
       style={{ flex: 1, width: "100%", height: "100%" }}
-      resizeMode="cover" // pode usar "cover", "contain" ou "stretch"
-      blurRadius={1} // deixa um leve esfumaçado elegante
+      resizeMode="cover" 
+      blurRadius={1} 
     >
       <ScrollView
         style={{
           flex: 1,
           backgroundColor: darkMode
             ? "rgba(0,0,0,0.5)"
-            : "rgba(255,255,255,0.6)", // leve transparência para ler o texto
+            : "rgba(255,255,255,0.6)", 
           paddingHorizontal: 20,
           paddingVertical: 40,
+          fontFamily: colors.fontFamily
+
         }}
       >
         {/* Título principal */}
@@ -43,6 +45,7 @@ export default function Homepage({ navigation }) {
             textAlign: "center",
             color: darkMode ? "#fff" : "#444",
             marginBottom: 30,
+            fontFamily: colors.fontFamily
           }}
         >
           Explore, avalie e descubra os melhores aplicativos da Google Play.
@@ -55,6 +58,7 @@ export default function Homepage({ navigation }) {
             textAlign: "center",
             color: darkMode ? "#fff" : "#444",
             marginBottom: 30,
+            fontFamily: colors.fontFamily
           }}
         >
           O <Text style={{ fontWeight: "bold" }}>Smart Ranking</Text> é um
@@ -76,10 +80,11 @@ export default function Homepage({ navigation }) {
                 borderRadius: 8,
                 alignItems: "center",
                 marginBottom: 15,
+                fontFamily: colors.fontFamily
               }}
             >
               <Text
-                style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}
+                style={{ color: "#fff", fontFamily: colors.fontFamily, fontSize: 16 }}
               >
                 Entrar
               </Text>
@@ -95,7 +100,7 @@ export default function Homepage({ navigation }) {
               }}
             >
               <Text
-                style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}
+                style={{ color: "#fff", fontFamily: colors.fontFamily, fontSize: 16,fontFamily: colors.fontFamily}}
               >
                 Cadastrar
               </Text>
@@ -105,15 +110,16 @@ export default function Homepage({ navigation }) {
 
         {/* Caso o usuário esteja logado, mostra uma saudação */}
         {user && (
-          <View style={{ marginTop: 40, alignItems: "center" }}>
+          <View style={{ marginTop: 20, alignItems: "center" }}>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: 22,
                 color: colors.text,
                 textAlign: "center",
+                fontFamily: colors.fontFamily
               }}
             >
-              👋 Bem-vindo(a),{" "}
+               Bem-vindo(a),{" "}
               <Text style={{ fontWeight: "bold" }}>{user.nome}</Text>!
             </Text>
           </View>

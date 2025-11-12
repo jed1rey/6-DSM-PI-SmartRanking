@@ -1,4 +1,3 @@
-// src/screens/Perfil.js
 import React from "react";
 import {
   View,
@@ -46,6 +45,7 @@ export default function Perfil({ navigation }) {
               color: colors.text,
               textAlign: "center",
               fontSize: 18,
+              fontFamily: colors.fontFamily
             }}
           >
             Nenhum usuário logado.
@@ -76,11 +76,11 @@ export default function Perfil({ navigation }) {
       >
         <Text
           style={{
-            fontSize: 36,
-            fontWeight: "bold",
+            fontSize: 38,
             textAlign: "center",
             marginBottom: 35,
             color: colors.text,
+            fontFamily: colors.fontFamily
           }}
         >
           Perfil
@@ -93,6 +93,7 @@ export default function Perfil({ navigation }) {
               color: colors.text,
               marginBottom: 10,
               textAlign: "center",
+              fontFamily: colors.fontFamily
             }}
           >
             <Text style={{ fontWeight: "bold" }}>Nome: </Text>
@@ -105,6 +106,7 @@ export default function Perfil({ navigation }) {
               color: colors.text,
               marginBottom: 10,
               textAlign: "center",
+              fontFamily: colors.fontFamily
             }}
           >
             <Text style={{ fontWeight: "bold" }}>Email: </Text>
@@ -116,6 +118,7 @@ export default function Perfil({ navigation }) {
               fontSize: 18,
               color: colors.text,
               textAlign: "center",
+              fontFamily: colors.fontFamily
             }}
           >
             <Text style={{ fontWeight: "bold" }}>Data de nascimento: </Text>
@@ -138,7 +141,7 @@ export default function Perfil({ navigation }) {
             style={{
               color: "#fff",
               fontSize: 16,
-              fontWeight: "bold",
+              fontFamily: colors.fontFamily
             }}
           >
             Sair

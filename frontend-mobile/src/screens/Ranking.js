@@ -1,197 +1,261 @@
-// src/screens/Ranking.js
 import React from "react";
 import {
   View,
   Text,
   ScrollView,
-  Image,
+  StyleSheet,
   ImageBackground,
+  TouchableOpacity,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 
-export default function Ranking() {
+// Mapeamento de categorias EN → PT
+const categoriasPT = {
+  "ART_AND_DESIGN": "Arte e Design",
+  "BEAUTY": "Beleza",
+  "BOOKS_AND_REFERENCE": "Livros e Referências",
+  "BUSINESS": "Negócios",
+  "COMICS": "Quadrinhos",
+  "COMMUNICATION": "Comunicação",
+  "DATING": "Relacionamento",
+  "EDUCATION": "Educação",
+  "ENTERTAINMENT": "Entretenimento",
+  "EVENTS": "Eventos",
+  "FAMILY": "Família",
+  "FINANCE": "Finanças",
+  "FOOD_AND_DRINK": "Comida e Bebida",
+  "GAME": "Jogos",
+  "HOUSE_AND_HOME": "Casa e Lar",
+  "LIBRARIES_AND_DEMO": "Bibliotecas e Demonstração",
+  "LIFESTYLE": "Estilo de Vida",
+  "MAPS_AND_NAVIGATION": "Mapas e Navegação",
+  "MEDICAL": "Medicina",
+  "NEWS_AND_MAGAZINES": "Notícias e Revistas",
+  "PARENTING": "Paternidade",
+  "PERSONALIZATION": "Personalização",
+  "PHOTOGRAPHY": "Fotografia",
+  "PRODUCTIVITY": "Produtividade",
+  "SHOPPING": "Compras",
+  "SOCIAL": "Social",
+  "SPORTS": "Esportes",
+  "TOOLS": "Ferramentas",
+  "TRAVEL_AND_LOCAL": "Viagem e Localização",
+  "VIDEO_PLAYERS": "Vídeo Players",
+  "WEATHER": "Clima",
+  "HEALTH_AND_FITNESS": "Saúde e Fitness",
+};
+
+export default function Ranking({ route, navigation }) {
   const { colors, darkMode } = useTheme();
+  const rankingData = route.params?.rankingData || {};
 
-  const topApps = [
-    {
-      nome: "Spotify",
-      categoria: "Música",
-      instalacoes: "500M+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone:
-        "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
-    },
-    {
-      nome: "Deezer",
-      categoria: "Música",
-      instalacoes: "100M+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone:
-        "https://upload.wikimedia.org/wikipedia/commons/4/48/Deezer_logo.svg",
-    },
-    {
-      nome: "Amazon Music",
-      categoria: "Música",
-      instalacoes: "50M+",
-      tipo: "Pago",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone:
-        "https://upload.wikimedia.org/wikipedia/commons/f/f1/Amazon_Music_logo.svg",
-    },
-    {
-      nome: "YouTube",
-      categoria: "Video",
-      instalacoes: "10B+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone:
-        "https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png",
-    },
-    {
-      nome: "TikTok",
-      categoria: "Video",
-      instalacoes: "2B+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone:
-        "https://upload.wikimedia.org/wikipedia/en/6/6b/TikTok_logo.svg",
-    },
-  ];
+  const resultados =
+    rankingData.resultados ||
+    rankingData?.data?.resultados ||
+    rankingData ||
+    [];
 
-  const calculateScore = (index, totalApps) => {
-    const maxScore = 100;
-    const minScore = 60;
-    const scoreRange = maxScore - minScore;
-    const score = maxScore - (index * (scoreRange / (totalApps - 1)));
-    return Math.round(score);
-  };
+  const top10 = resultados.filter(r => r.tipo_resultado === "TOP10_RANKING");
+  const recomendacoes = resultados.filter(r => r.tipo_resultado === "KNN_RECOMENDACAO");
 
   return (
     <ImageBackground
-      source={require("../../assets/background.png")} // mesmo fundo padrão
+      source={require("../../assets/background.png")}
       style={{ flex: 1, width: "100%", height: "100%" }}
       resizeMode="cover"
       blurRadius={1}
     >
       <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          padding: 20,
-          backgroundColor: darkMode
-            ? "rgba(0,0,0,0.5)"
-            : "rgba(255,255,255,0.6)",
-        }}
+        contentContainerStyle={[
+          styles.container,
+          {
+            backgroundColor: darkMode
+              ? "rgba(0,0,0,0.6)"
+              : "rgba(255,255,255,0.7)",
+          },
+        ]}
       >
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: "bold",
-            textAlign: "center",
-            marginBottom: 25,
-            color: colors.text,
-          }}
-        >
-          Ranking Top 10 Apps
+        <Text style={[styles.title, { color: colors.text, fontFamily: colors.fontFamily }]}>
+          Resultado da Pesquisa
         </Text>
 
-        <View style={{ width: "100%" }}>
-          {topApps.map((app, index) => {
-            const score = calculateScore(index, topApps.length);
-
-            return (
+        {/* Ranking Principal */}
+        {top10.length > 0 && (
+          <>
+            <Text
+              style={[
+                styles.subtitleRanking,
+                { color: colors.accent, fontFamily: colors.fontFamily },
+              ]}
+            >
+              🏆 Top Ranking  
+            </Text>
+            {top10.map((item, index) => (
               <View
                 key={index}
-                style={{
-                  width: "100%",
-                  padding: 15,
-                  borderRadius: 10,
-                  backgroundColor: darkMode
-                    ? "rgba(33,33,33,0.8)"
-                    : "rgba(255,255,255,0.9)",
-                  marginBottom: 15,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: darkMode ? 0.7 : 0.1,
-                  shadowRadius: 4,
-                  elevation: 3,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
+                style={[
+                  styles.card,
+                  { backgroundColor: colors.card, borderColor: colors.inputBorder },
+                ]}
               >
-                {/* Informações do App */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 15,
-                    flex: 1,
-                  }}
+                <Text
+                  style={[
+                    styles.position,
+                    { color: colors.primary, fontFamily: colors.fontFamily },
+                  ]}
                 >
-                  <Image
-                    source={{ uri: app.icone }}
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: 10,
-                      backgroundColor: "#fff",
-                    }}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        color: colors.text,
-                        fontSize: 16,
-                      }}
-                    >
-                      {index + 1}º {app.nome}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        color: colors.text,
-                        marginTop: 2,
-                      }}
-                    >
-                      {app.categoria} | {app.tipo} | {app.genero} | {app.faixa}
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: 13,
-                        color: colors.text,
-                        marginTop: 2,
-                      }}
-                    >
-                      Instalações: {app.instalacoes}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Pontuação */}
-                <View style={{ minWidth: 60, alignItems: "flex-end" }}>
+                  {item.posicao ?? index + 1}
+                </Text>
+                <View style={{ flex: 1 }}>
                   <Text
-                    style={{
-                      fontSize: 24,
-                      fontWeight: "bold",
-                      color: darkMode ? "#81c995" : "#34a853",
-                    }}
+                    style={[styles.appName, { color: colors.text, fontFamily: colors.fontFamily }]}
                   >
-                    {score}
+                    {item.app_nome}
+                  </Text>
+                  <Text style={[styles.detail, { color: colors.text }]}>
+                    Categoria: {categoriasPT[item.categoria] ?? item.categoria}
+                  </Text>
+                  <Text style={[styles.detail, { color: colors.text }]}>
+                    Nota Final: {item.nota_final ?? item.rating}
                   </Text>
                 </View>
               </View>
-            );
-          })}
-        </View>
+            ))}
+          </>
+        )}
+
+        {/*Recomendações*/}
+        {recomendacoes.length > 0 && (
+          <>
+            <Text
+              style={[
+                styles.subtitleRecomend,
+                { color: "#fff", fontFamily: colors.fontFamily },
+              ]}
+            >
+              Recomendações Baseadas em Similaridade
+            </Text>
+            {recomendacoes.map((item, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.card,
+                  { backgroundColor: colors.card, borderColor: colors.inputBorder },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.position,
+                    { color: colors.secondary, fontFamily: colors.fontFamily },
+                  ]}
+                >
+                  {item.posicao ?? index + 1}
+                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[styles.appName, { color: colors.text, fontFamily: colors.fontFamily }]}
+                  >
+                    {item.app_nome}
+                  </Text>
+                  <Text style={[styles.detail, { color: colors.text }]}>
+                    Categoria: {categoriasPT[item.categoria] ?? item.categoria}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        {/*Nenhum Resultado*/}
+        {resultados.length === 0 && (
+          <Text style={[styles.noData, { color: colors.text, fontFamily: colors.fontFamily }]}>
+            Nenhum resultado encontrado.
+          </Text>
+        )}
+
+        {/*Botão Nova Pesquisa*/}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Pesquisa", { resetForm: true })}
+          style={[
+            styles.newSearchButton,
+            { backgroundColor: colors.accent },
+          ]}
+        >
+          <Text
+            style={{
+              color: darkMode ? "#000" : "#111",
+              fontSize: 16,
+              fontWeight: "bold",
+              fontFamily: colors.fontFamily,
+            }}
+          >
+            🔁 Nova Pesquisa
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 26,
+    textAlign: "center",
+    marginBottom: 25,
+    fontWeight: "600",
+  },
+  subtitleRanking: {
+    fontSize: 24,
+    marginTop: 15,
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  subtitleRecomend: {
+    fontSize: 20,
+    marginTop: 25,
+    marginBottom: 10,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 12,
+    elevation: 3,
+  },
+  position: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginRight: 15,
+    width: 30,
+    textAlign: "center",
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  detail: {
+    fontSize: 14,
+  },
+  noData: {
+    textAlign: "center",
+    fontSize: 16,
+    marginTop: 20,
+  },
+  newSearchButton: {
+    marginTop: 25,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    alignSelf: "center",
+    width: "80%",
+  },
+});
