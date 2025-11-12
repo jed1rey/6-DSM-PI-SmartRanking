@@ -1,4 +1,3 @@
-// src/screens/Cadastro.js
 import React, { useState } from "react";
 import {
   View,
@@ -36,7 +35,7 @@ export default function Cadastro({ navigation }) {
 
   return (
     <ImageBackground
-      source={require("../../assets/background.png")} // mesmo fundo da Home
+      source={require("../../assets/background.png")} 
       style={{ flex: 1, width: "100%", height: "100%" }}
       resizeMode="cover"
       blurRadius={1} // leve esfumaçado
@@ -48,16 +47,16 @@ export default function Cadastro({ navigation }) {
           padding: 20,
           backgroundColor: darkMode
             ? "rgba(0,0,0,0.5)"
-            : "rgba(255,255,255,0.6)", // leve transparência
+            : "rgba(255,255,255,0.6)", 
         }}
       >
         <Text
           style={{
             fontSize: 28,
-            fontWeight: "bold",
             textAlign: "center",
             marginBottom: 40,
             color: colors.text,
+            fontFamily: colors.fontFamily
           }}
         >
           Cadastro
@@ -77,6 +76,7 @@ export default function Cadastro({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
         />
 
@@ -94,6 +94,7 @@ export default function Cadastro({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
         />
 
@@ -113,6 +114,7 @@ export default function Cadastro({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
         />
 
@@ -131,6 +133,7 @@ export default function Cadastro({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
         />
 
@@ -145,7 +148,7 @@ export default function Cadastro({ navigation }) {
             opacity: loading ? 0.7 : 1,
           }}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+          <Text style={{ color: "#fff", fontFamily: colors.fontFamily, fontSize: 16 }}>
             {loading ? "Cadastrando..." : "Cadastrar"}
           </Text>
         </TouchableOpacity>

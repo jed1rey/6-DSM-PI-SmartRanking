@@ -20,6 +20,7 @@ export function ThemeProvider({ children }) {
       primary: '#1976d2',
       secondary: '#2e7d32',
       accent: '#fbc02d',
+      fontFamily: "Poppins_400Regular",
     }
   };
 

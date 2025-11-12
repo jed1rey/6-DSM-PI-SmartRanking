@@ -1,4 +1,3 @@
-// src/screens/Login.js
 import React, { useState } from "react";
 import {
   View,
@@ -33,10 +32,10 @@ export default function Login({ navigation }) {
 
   return (
     <ImageBackground
-      source={require("../../assets/background.png")} // mesmo fundo da Home
+      source={require("../../assets/background.png")} 
       style={{ flex: 1, width: "100%", height: "100%" }}
       resizeMode="cover"
-      blurRadius={1} // leve esfumaçado
+      blurRadius={1} 
     >
       <ScrollView
         style={{
@@ -44,17 +43,17 @@ export default function Login({ navigation }) {
           padding: 20,
           backgroundColor: darkMode
             ? "rgba(0,0,0,0.5)"
-            : "rgba(255,255,255,0.6)", // transparência para leitura
+            : "rgba(255,255,255,0.6)", 
         }}
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
       >
         <Text
           style={{
             fontSize: 28,
-            fontWeight: "bold",
             textAlign: "center",
             marginBottom: 30,
             color: colors.text,
+            fontFamily: colors.fontFamily
           }}
         >
           Login
@@ -72,6 +71,7 @@ export default function Login({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
           placeholder="Email"
           placeholderTextColor={darkMode ? "#888" : "#666"}
@@ -91,6 +91,7 @@ export default function Login({ navigation }) {
             borderWidth: 1,
             borderColor: colors.inputBorder,
             fontSize: 16,
+            fontFamily: colors.fontFamily
           }}
           placeholder="Senha"
           placeholderTextColor={darkMode ? "#888" : "#666"}
@@ -109,7 +110,7 @@ export default function Login({ navigation }) {
             opacity: loading ? 0.7 : 1,
           }}
         >
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+          <Text style={{ color: "#fff", fontFamily: colors.fontFamily, fontSize: 16 }}>
             {loading ? "Entrando..." : "Entrar"}
           </Text>
         </TouchableOpacity>
@@ -121,6 +122,7 @@ export default function Login({ navigation }) {
               color: darkMode ? "#8ab4f8" : "#1a73e8",
               textDecorationLine: "underline",
               fontSize: 16,
+              fontFamily: colors.fontFamily
             }}
           >
             Não tem uma conta? Cadastre-se
