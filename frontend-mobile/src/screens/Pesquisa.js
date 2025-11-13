@@ -26,7 +26,7 @@ export default function Pesquisa({ navigation }) {
         ?.routes?.find((r) => r.name === "Pesquisa")?.params?.resetForm;
 
       if (resetParam) {
-        console.log("🧹 Formulário resetado automaticamente");
+        console.log(" Formulário resetado automaticamente");
         setForm({});
         navigation.setParams({ resetForm: false }); // limpa o parâmetro
       }

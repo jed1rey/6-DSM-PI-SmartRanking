@@ -277,7 +277,7 @@ export default function Ranking({ route, navigation }) {
               fontFamily: colors.fontFamily,
             }}
           >
-            🔁 Nova Pesquisa
+             Nova Pesquisa
           </Text>
         </TouchableOpacity>
       </ScrollView>
