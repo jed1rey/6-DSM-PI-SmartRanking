@@ -1,18 +1,18 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { logout, isLoggedIn } from "../services/api";
-import { getUserFromToken } from "../utils/auth";
 
 export default function Header() {
   const { darkMode, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const user = getUserFromToken();
 
   const pageColors = {
     "/": "#1976d2",
+    "/login": "#1976d2",
     "/cadastro": "#2e7d32",
     "/pesquisa": "#fbc02d",
     "/ranking": "#d32f2f",
@@ -22,7 +22,7 @@ export default function Header() {
   const headerColor = pageColors[location.pathname] || "#202124";
 
   const handleLogout = () => {
-    logout();
+    signOut();
     navigate("/");
   };
 
@@ -49,16 +49,36 @@ export default function Header() {
           style={{ height: "80px", width: "auto" }}
         />
         <nav style={{ display: "flex", gap: "20px" }}>
-          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>Login</Link>
-          <Link to="/cadastro" style={{ color: "inherit", textDecoration: "none" }}>Cadastro</Link>
-          <Link to="/pesquisa" style={{ color: "inherit", textDecoration: "none" }}>Pesquisa</Link>
-          <Link to="/ranking" style={{ color: "inherit", textDecoration: "none" }}>Ranking</Link>
-          <Link to="/perfil" style={{ color: "inherit", textDecoration: "none" }}>Perfil</Link>
+          <Link to="/" style={{ color: "inherit", textDecoration: "none" }}>
+            Home
+          </Link>
+          {!user ? (
+            <>
+              <Link to="/login" style={{ color: "inherit", textDecoration: "none" }}>
+                Login
+              </Link>
+              <Link to="/cadastro" style={{ color: "inherit", textDecoration: "none" }}>
+                Cadastro
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/pesquisa" style={{ color: "inherit", textDecoration: "none" }}>
+                Pesquisa
+              </Link>
+              <Link to="/ranking" style={{ color: "inherit", textDecoration: "none" }}>
+                Ranking
+              </Link>
+              <Link to="/perfil" style={{ color: "inherit", textDecoration: "none" }}>
+                Perfil
+              </Link>
+            </>
+          )}
         </nav>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        {isLoggedIn() && user && (
+        {user && (
           <>
             <span style={{ fontWeight: "500" }}>
               {user.nome || user.email}

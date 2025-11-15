@@ -1,186 +1,200 @@
 import React from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useNavigate, useLocation } from "react-router-dom";
+
+// Mapeamento de categorias
+const categoriasPT = {
+  "ART_AND_DESIGN": "Arte e Design",
+  "BEAUTY": "Beleza",
+  "BOOKS_AND_REFERENCE": "Livros e Referências",
+  "BUSINESS": "Negócios",
+  "COMICS": "Quadrinhos",
+  "COMMUNICATION": "Comunicação",
+  "DATING": "Relacionamento",
+  "EDUCATION": "Educação",
+  "ENTERTAINMENT": "Entretenimento",
+  "EVENTS": "Eventos",
+  "FAMILY": "Família",
+  "FINANCE": "Finanças",
+  "FOOD_AND_DRINK": "Comida e Bebida",
+  "GAME": "Jogos",
+  "HOUSE_AND_HOME": "Casa e Lar",
+  "LIBRARIES_AND_DEMO": "Bibliotecas e Demonstração",
+  "LIFESTYLE": "Estilo de Vida",
+  "MAPS_AND_NAVIGATION": "Mapas e Navegação",
+  "MEDICAL": "Medicina",
+  "NEWS_AND_MAGAZINES": "Notícias e Revistas",
+  "PARENTING": "Paternidade",
+  "PERSONALIZATION": "Personalização",
+  "PHOTOGRAPHY": "Fotografia",
+  "PRODUCTIVITY": "Produtividade",
+  "SHOPPING": "Compras",
+  "SOCIAL": "Social",
+  "SPORTS": "Esportes",
+  "TOOLS": "Ferramentas",
+  "TRAVEL_AND_LOCAL": "Viagem e Localização",
+  "VIDEO_PLAYERS": "Video Players",
+  "WEATHER": "Clima",
+  "HEALTH_AND_FITNESS": "Saúde e Fitness",
+};
 
 export default function Ranking() {
   const { darkMode } = useTheme();
-
-  // Mock de 10 apps
-  const topApps = [
-    {
-      nome: "Spotify",
-      categoria: "Música",
-      instalacoes: "500M+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"
-    },
-    {
-      nome: "Deezer",
-      categoria: "Música",
-      instalacoes: "100M+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/4/48/Deezer_logo.svg"
-    },
-    {
-      nome: "Amazon Music",
-      categoria: "Música",
-      instalacoes: "50M+",
-      tipo: "Pago",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Amazon_Music_logo.svg"
-    },
-    {
-      nome: "YouTube",
-      categoria: "Vídeo",
-      instalacoes: "10B+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png"
-    },
-    {
-      nome: "TikTok",
-      categoria: "Vídeo",
-      instalacoes: "2B+",
-      tipo: "Gratuito",
-      genero: "Entretenimento",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/en/6/6b/TikTok_logo.svg"
-    },
-    {
-      nome: "Netflix",
-      categoria: "Vídeo",
-      instalacoes: "1B+",
-      tipo: "Pago",
-      genero: "Entretenimento",
-      faixa: "16+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
-    },
-    {
-      nome: "Instagram",
-      categoria: "Social",
-      instalacoes: "1B+",
-      tipo: "Gratuito",
-      genero: "Rede Social",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg"
-    },
-    {
-      nome: "Facebook",
-      categoria: "Social",
-      instalacoes: "5B+",
-      tipo: "Gratuito",
-      genero: "Rede Social",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png"
-    },
-    {
-      nome: "Messenger",
-      categoria: "Social",
-      instalacoes: "1B+",
-      tipo: "Gratuito",
-      genero: "Comunicação",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/8/83/Facebook_Messenger_4_Logo.svg"
-    },
-    {
-      nome: "WhatsApp",
-      categoria: "Social",
-      instalacoes: "5B+",
-      tipo: "Gratuito",
-      genero: "Comunicação",
-      faixa: "12+",
-      icone: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-    },
-  ];
-
+  const navigate = useNavigate();
+  const location = useLocation();
   
-  const calculateScore = (index, totalApps) => {
-    const maxScore = 100;
-    const minScore = 60; // Definindo uma nota mínima para o último colocado
-    const scoreRange = maxScore - minScore;
-    
-    
-    const score = maxScore - (index * (scoreRange / (totalApps - 1)));
-    return Math.round(score); 
-  };
+  // Obtém os dados da pesquisa passados pela página de Pesquisa
+  const rankingData = location.state?.rankingData || null;
+  const resultados = rankingData?.resultados || [];
+
+  // Se não houver dados, mostra mensagem
+  if (!rankingData || resultados.length === 0) {
+    return (
+      <div>
+        <h2 style={titleStyle(darkMode)}>Ranking</h2>
+        <div style={noDataStyle(darkMode)}>
+          <p>Nenhum resultado disponível ainda.</p>
+          <p>Faça uma pesquisa para ver o ranking e recomendações.</p>
+          <button 
+            onClick={() => navigate("/pesquisa")}
+            style={buttonStyle(darkMode)}
+          >
+            Ir para Pesquisa
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Filtra os resultados
+  const top10 = resultados.filter((r) => r.tipo_resultado === "TOP10_RANKING");
+  const recomendacoes = resultados.filter((r) => r.tipo_resultado === "KNN_RECOMENDACAO");
 
   return (
-    <div style={containerStyle(darkMode)}>
-      <h2 style={titleStyle(darkMode)}>Ranking Top 10 Apps</h2>
+    <div>
+      <h2 style={titleStyle(darkMode)}>Resultado da Pesquisa</h2>
 
-      {topApps.map((app, index) => {
-        const score = calculateScore(index, topApps.length); 
-        return (
-          <div key={index} style={cardStyle(darkMode)}>
-           
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
-                <img src={app.icone} alt={app.nome} style={{ width: 50, height: 50, borderRadius: 10 }} />
-                <div>
-                  <strong>{index + 1}º - {app.nome}</strong>
-                  <div style={textStyle(darkMode)}>
-                    {app.categoria} | {app.tipo} | {app.genero} | {app.faixa}
-                  </div>
-                  <div style={textStyle(darkMode)}>Instalações: {app.instalacoes}</div>
+      {/* Ranking Principal */}
+      {top10.length > 0 && (
+        <div style={{ marginBottom: "30px" }}>
+          <h3 style={subtitleStyle(darkMode)}>Top Ranking</h3>
+          {top10.map((item, index) => (
+            <div key={index} style={cardStyle(darkMode)}>
+              <div style={positionStyle}>{item.posicao ?? index + 1}</div>
+              <div style={{ flex: 1 }}>
+                <div style={appNameStyle}>{item.app_nome}</div>
+                <div style={detailStyle(darkMode)}>
+                  Categoria: {categoriasPT[item.categoria] || item.categoria}
+                </div>
+                <div style={detailStyle(darkMode)}>
+                  Nota Final: {item.nota_final ?? item.rating}
                 </div>
               </div>
-              
-              <div style={scoreStyle(darkMode)}>
-                {score}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Recomendações */}
+      {recomendacoes.length > 0 && (
+        <div style={{ marginBottom: "30px" }}>
+          <h3 style={subtitleStyle(darkMode)}>Recomendações</h3>
+          {recomendacoes.map((item, index) => (
+            <div key={index} style={cardStyle(darkMode)}>
+              <div style={{...positionStyle, color: "#4fc3f7"}}>
+                {item.posicao ?? index + 1}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={appNameStyle}>{item.app_nome}</div>
+                <div style={detailStyle(darkMode)}>
+                  Categoria: {categoriasPT[item.categoria] || item.categoria}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+      )}
+
+      <button 
+        onClick={() => navigate("/pesquisa")}
+        style={secondaryButtonStyle(darkMode)}
+      >
+        Nova Pesquisa
+      </button>
     </div>
   );
 }
 
-const containerStyle = (darkMode) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "15px",
-  width: "100%",
-  maxWidth: "600px", 
-  margin: "20px auto", 
-  padding: "0 15px" 
-});
-
+// Estilos
 const titleStyle = (darkMode) => ({
-  marginBottom: 20,
+  marginBottom: "20px",
   color: darkMode ? "#e8eaed" : "#202124",
   textAlign: "center"
 });
 
-const cardStyle = (darkMode) => ({
-  width: "100%",
-  padding: 15,
-  borderRadius: 10,
-  backgroundColor: darkMode ? "#2c2c2c" : "#ffffff",
-  boxShadow: darkMode ? "0px 4px 10px rgba(0,0,0,0.7)" : "0px 4px 10px rgba(0,0,0,0.1)",
-  transition: "background 0.3s ease, box-shadow 0.3s ease",
-  display: "flex", 
-  alignItems: "center", 
-  justifyContent: "space-between", 
+const noDataStyle = (darkMode) => ({
+  textAlign: "center",
+  padding: "40px",
+  backgroundColor: darkMode ? "#2c2c2c" : "#f5f5f5",
+  borderRadius: "8px",
+  border: darkMode ? "1px solid #444" : "1px solid #ddd",
 });
 
-const textStyle = (darkMode) => ({
-  fontSize: 13,
-  color: darkMode ? "#e8eaed" : "#202124",
-  marginTop: 2,
-});
-
-
-const scoreStyle = (darkMode) => ({
-  fontSize: 24,
+const buttonStyle = (darkMode) => ({
+  marginTop: "15px",
+  padding: "10px 20px",
+  background: "#fbc02d",
+  color: "#000",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
   fontWeight: "bold",
-  color: darkMode ? "#81c995" : "#34a853", 
-  minWidth: "60px", 
-  textAlign: "right",
+});
+
+const subtitleStyle = (darkMode) => ({
+  color: darkMode ? "#e8eaed" : "#202124",
+  marginBottom: "15px",
+  textAlign: "center"
+});
+
+const cardStyle = (darkMode) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "15px",
+  marginBottom: "10px",
+  borderRadius: "8px",
+  backgroundColor: darkMode ? "#2c2c2c" : "#f5f5f5",
+  border: darkMode ? "1px solid #444" : "1px solid #ddd",
+});
+
+const positionStyle = {
+  fontSize: "20px",
+  fontWeight: "bold",
+  color: "#fbc02d",
+  marginRight: "15px",
+  minWidth: "30px",
+  textAlign: "center"
+};
+
+const appNameStyle = {
+  fontSize: "16px",
+  fontWeight: "bold",
+  color: "#fff",
+  marginBottom: "5px"
+};
+
+const detailStyle = (darkMode) => ({
+  fontSize: "12px",
+  color: darkMode ? "#ccc" : "#666"
+});
+
+const secondaryButtonStyle = (darkMode) => ({
+  marginTop: "20px",
+  padding: "10px 20px",
+  background: "transparent",
+  color: darkMode ? "#8ab4f8" : "#1976d2",
+  border: `1px solid ${darkMode ? "#8ab4f8" : "#1976d2"}`,
+  borderRadius: "6px",
+  cursor: "pointer",
+  width: "100%"
 });

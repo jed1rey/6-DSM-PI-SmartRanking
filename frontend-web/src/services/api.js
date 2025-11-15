@@ -11,29 +11,19 @@ export async function registerUser(data) {
 
 export async function loginUser(data) {
   try {
-    const response = await fetch("https://six-dsm-pi-smartranking.onrender.com/auth/login", {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
-    const resData = await response.json();
-
-    if (!response.ok) {
-      console.error("Erro no login:", resData);
-    }
-
-    return resData;
+    return response.json();
   } catch (err) {
     console.error("Falha na requisição de login:", err);
     return { error: "Falha de conexão com o servidor." };
   }
 }
 
-export async function criarPesquisa(data) {
-  const token = getToken();
+export async function criarPesquisa(data, token) {
   const response = await fetch(`${API_URL}/api/pesquisas`, {
     method: "POST",
     headers: {
@@ -45,6 +35,26 @@ export async function criarPesquisa(data) {
   return response.json();
 }
 
+export async function obterResultadoPesquisa(pesquisaId, token) {
+  const response = await fetch(`${API_URL}/api/resultados/${pesquisaId}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+// Função para obter pesquisas do usuário
+export async function obterPesquisasUsuario(userId, token) {
+  const response = await fetch(`${API_URL}/api/pesquisas/user/${userId}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+  });
+  return response.json();
+}
+
+// Funções de token
 export function saveToken(token) {
   localStorage.setItem("token", token);
 }
