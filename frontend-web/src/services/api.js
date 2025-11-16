@@ -1,62 +1,67 @@
+// src/services/api.js
 const API_URL = "https://six-dsm-pi-smartranking.onrender.com";
 
 export async function registerUser(data) {
-  const response = await fetch(`${API_URL}/auth/register`, {
+  const res = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  return response.json();
+  return res.json();
 }
 
 export async function loginUser(data) {
   try {
-    const response = await fetch("https://six-dsm-pi-smartranking.onrender.com/auth/login", {
+    const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
-    const resData = await response.json();
-
-    if (!response.ok) {
-      console.error("Erro no login:", resData);
-    }
-
-    return resData;
+    return res.json();
   } catch (err) {
-    console.error("Falha na requisição de login:", err);
-    return { error: "Falha de conexão com o servidor." };
+    console.error("loginUser error:", err);
+    return { error: "Erro de conexão" };
   }
 }
 
-export async function criarPesquisa(data) {
-  const token = getToken();
-  const response = await fetch(`${API_URL}/api/pesquisas`, {
+export async function fetchUserById(userId, token) {
+  try {
+    const res = await fetch(`${API_URL}/auth/users/${userId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch (err) {
+    console.error("fetchUserById:", err);
+    return null;
+  }
+}
+
+export async function criarPesquisa(data, token) {
+  const res = await fetch(`${API_URL}/api/pesquisas`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
-  return response.json();
+  return res.json();
 }
 
-export function saveToken(token) {
-  localStorage.setItem("token", token);
+export async function obterResultadoPesquisa(pesquisaId, token) {
+  const res = await fetch(`${API_URL}/api/resultados/${pesquisaId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
 }
 
-export function getToken() {
-  return localStorage.getItem("token");
-}
-
-export function logout() {
-  localStorage.removeItem("token");
-}
-
-export function isLoggedIn() {
-  return !!localStorage.getItem("token");
+export async function obterPesquisasUsuario(userId, token) {
+  const res = await fetch(`${API_URL}/api/pesquisas/user/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
 }
