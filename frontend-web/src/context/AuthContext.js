@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { jwtDecode } from 'jwt-decode';
-import { loginUser, registerUser } from "../services/api";
+import { jwtDecode } from "jwt-decode";
+import { loginUser, registerUser, fetchUserById as apiFetchUserById } from "../services/api";
 
 const AuthContext = createContext();
 
@@ -9,106 +9,81 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Carregar token/usuário do localStorage
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initialize = async () => {
       try {
         const storedToken = localStorage.getItem("@sr:token");
         const storedUser = localStorage.getItem("@sr:user");
-
         if (storedToken) {
           setToken(storedToken);
           if (storedUser) {
             setUser(JSON.parse(storedUser));
           } else {
+            // decodifica e busca usuário completo
             const decoded = jwtDecode(storedToken);
-            // Buscar informações completas do usuário
-            await fetchUserById(decoded.userId || decoded.sub, storedToken);
+            const id = decoded.sub || decoded.userId || decoded.id;
+            if (id) {
+              const u = await apiFetchUserById(id, storedToken);
+              if (u) {
+                setUser(u);
+                localStorage.setItem("@sr:user", JSON.stringify(u));
+              } else {
+                setUser({
+                  id,
+                  email: decoded.email || "",
+                  nome: decoded.nome || decoded.name || "Usuário",
+                });
+              }
+            }
           }
         }
       } catch (err) {
-        console.warn("Erro carregando auth:", err);
+        console.warn("Auth init error:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    initializeAuth();
+    initialize();
   }, []);
-
-  const fetchUserById = async (userId, authToken) => {
-    try {
-      const response = await fetch(`https://six-dsm-pi-smartranking.onrender.com/auth/users/${userId}`, {
-        headers: { 
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json"
-        },
-      });
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-        localStorage.setItem("@sr:user", JSON.stringify(userData));
-        return userData;
-      } else {
-        console.warn("Não foi possível buscar dados do usuário");
-        // Se não conseguir buscar, usa os dados básicos do token
-        const decoded = jwtDecode(authToken);
-        const basicUser = {
-          id: decoded.userId || decoded.sub,
-          email: decoded.email,
-          nome: decoded.nome || "Usuário"
-        };
-        setUser(basicUser);
-        localStorage.setItem("@sr:user", JSON.stringify(basicUser));
-        return basicUser;
-      }
-    } catch (err) {
-      console.warn("Error fetchUserById:", err);
-      // Fallback para dados básicos do token
-      const decoded = jwtDecode(authToken);
-      const basicUser = {
-        id: decoded.userId || decoded.sub,
-        email: decoded.email,
-        nome: decoded.nome || "Usuário"
-      };
-      setUser(basicUser);
-      localStorage.setItem("@sr:user", JSON.stringify(basicUser));
-      return basicUser;
-    }
-  };
 
   const signIn = async ({ email, senha }) => {
     try {
       const res = await loginUser({ email, senha });
-      
-      if (res.token) {
-        const decoded = jwtDecode(res.token);
-        
-        localStorage.setItem("@sr:token", res.token);
-        
-        // Buscar dados completos do usuário
-        const userData = await fetchUserById(decoded.userId || decoded.sub, res.token);
-        
-        setToken(res.token);
+      if (!res || !res.token) throw new Error(res?.message || "Login falhou");
+      const decoded = jwtDecode(res.token);
+      const id = decoded.sub || decoded.userId || decoded.id;
+      localStorage.setItem("@sr:token", res.token);
+      setToken(res.token);
+
+      // buscar usuário completo
+      const userData = await apiFetchUserById(id, res.token);
+      if (userData) {
         setUser(userData);
-        
-        return { success: true };
+        localStorage.setItem("@sr:user", JSON.stringify(userData));
       } else {
-        throw new Error(res.error || "Credenciais inválidas");
+        const fallback = {
+          id,
+          email: decoded.email || "",
+          nome: decoded.nome || decoded.name || "Usuário",
+        };
+        setUser(fallback);
+        localStorage.setItem("@sr:user", JSON.stringify(fallback));
       }
+      return { success: true };
     } catch (err) {
-      console.error("Erro signIn:", err);
+      console.error("signIn error:", err);
       throw err;
     }
   };
 
   const signUp = async ({ nome, data_nascimento, email, senha }) => {
     try {
-      await registerUser({ nome, data_nascimento, email, senha });
-      // Após cadastro, faz login automático
+      const res = await registerUser({ nome, data_nascimento, email, senha });
+      // se o backend retorna algo diferente, ainda tentamos o login automático
       await signIn({ email, senha });
     } catch (err) {
-      console.error("Erro signUp:", err);
+      console.error("signUp error:", err);
       throw err;
     }
   };
@@ -121,14 +96,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      loading, 
-      signIn, 
-      signUp, 
-      signOut 
-    }}>
+    <AuthContext.Provider value={{ user, token, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

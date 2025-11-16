@@ -7,101 +7,164 @@ export default function Cadastro() {
   const { darkMode } = useTheme();
   const { signUp } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    nome: "",
-    data_nascimento: "",
-    email: "",
-    senha: "",
-  });
-  const [mensagem, setMensagem] = useState("");
+  const [form, setForm] = useState({ nome: "", data_nascimento: "", email: "", senha: "" });
+  const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const change = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async () => {
+  const submit = async () => {
     setLoading(true);
     try {
       await signUp(form);
-      setMensagem("✅ Cadastro realizado com sucesso!");
-      setTimeout(() => navigate("/pesquisa-ranking"), 2000);
+      setMsg("✅ Cadastro realizado com sucesso! Redirecionando...");
+      setTimeout(() => navigate("/pesquisa"), 1200);
     } catch (err) {
-      setMensagem(err.message || "✕ Erro ao cadastrar usuário.");
+      setMsg(err.message || "Erro ao cadastrar");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2 style={titleStyle(darkMode)}>Cadastro</h2>
-      <input 
-        name="nome" 
-        style={inputStyle(darkMode)} 
-        placeholder="Nome" 
-        value={form.nome}
-        onChange={handleChange}
-      />
-      <input 
-        name="data_nascimento" 
-        style={inputStyle(darkMode)} 
-        type="date" 
-        value={form.data_nascimento}
-        onChange={handleChange}
-      />
-      <input 
-        name="email" 
-        style={inputStyle(darkMode)} 
-        placeholder="Email" 
-        value={form.email}
-        onChange={handleChange}
-      />
-      <input 
-        name="senha" 
-        style={inputStyle(darkMode)} 
-        type="password" 
-        placeholder="Senha" 
-        value={form.senha}
-        onChange={handleChange}
-      />
-      <button 
-        style={buttonStyle(darkMode, loading)} 
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? "Cadastrando..." : "Cadastrar"}
-      </button>
-      {mensagem && <p style={{ marginTop: "10px", textAlign: "center" }}>{mensagem}</p>}
+    <div style={outerContainerStyle}>
+      <div style={containerStyle(darkMode)}>
+        <h2 style={titleStyle(darkMode)}>📝 Cadastro</h2>
+        <p style={subtitleStyle(darkMode)}>
+          Crie sua conta para acessar o Smart Ranking
+        </p>
+        
+        <input 
+          name="nome" 
+          placeholder="Nome completo" 
+          value={form.nome} 
+          onChange={change} 
+          style={inputStyle(darkMode)} 
+        />
+        <input 
+          name="data_nascimento" 
+          type="date" 
+          value={form.data_nascimento} 
+          onChange={change} 
+          style={inputStyle(darkMode)} 
+        />
+        <input 
+          name="email" 
+          placeholder="Email" 
+          value={form.email} 
+          onChange={change} 
+          style={inputStyle(darkMode)} 
+        />
+        <input 
+          name="senha" 
+          placeholder="Senha" 
+          value={form.senha} 
+          onChange={change} 
+          type="password" 
+          style={inputStyle(darkMode)} 
+        />
+        
+        <button 
+          onClick={submit} 
+          disabled={loading} 
+          style={buttonStyle(darkMode, loading)}
+        >
+          {loading ? " Cadastrando..." : " Cadastrar"}
+        </button>
+        
+        {msg && <p style={messageStyle}>{msg}</p>}
+        
+        <p style={loginLinkStyle(darkMode)} onClick={() => navigate("/login")}>
+          Já tem uma conta? <span style={{ fontWeight: "600" }}>Faça login</span>
+        </p>
+      </div>
     </div>
   );
 }
 
-// ESTILOS PARA CADASTRO
-const titleStyle = (darkMode) => ({
-  marginBottom: "20px",
-  color: darkMode ? "#e8eaed" : "#202124",
+
+const outerContainerStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "calc(70vh - 70px)",
+  padding: "15px",
+  width: "100%"
+};
+
+
+const containerStyle = (darkMode) => ({
+  background: "rgba(0,0,0,0.55)",
+  padding: "40px 30px",
+  borderRadius: "16px",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+  maxWidth: "450px",
+  width: "100%",
   textAlign: "center"
 });
 
-const inputStyle = (darkMode) => ({
-  margin: "10px 0",
-  padding: "12px",
-  width: "96%",
-  borderRadius: "6px",
-  border: darkMode ? "1px solid #555" : "1px solid #ccc",
-  backgroundColor: darkMode ? "#3c3c3c" : "#f9f9f9",
-  color: darkMode ? "#fff" : "#000",
+const titleStyle = (darkMode) => ({ 
+  color: "#fff", 
+  textAlign: "center", 
+  marginBottom: "8px",
+  fontSize: "2rem",
+  fontWeight: "500", 
+  fontFamily: "'Inter', sans-serif"
 });
 
-const buttonStyle = (darkMode, loading) => ({
-  marginTop: "15px",
-  padding: "12px",
-  width: "100%",
-  background: loading ? "#999" : "#2e7d32",
+const subtitleStyle = (darkMode) => ({
+  color: "#ddd",
+  textAlign: "center",
+  marginBottom: "30px",
+  fontSize: "1rem",
+  opacity: 0.9,
+  fontWeight: "400", 
+  fontFamily: "'Inter', sans-serif"
+});
+
+const inputStyle = (darkMode) => ({ 
+  width: "100%", 
+  padding: "14px",
+  marginBottom: "16px", 
+  borderRadius: "8px", 
+  border: "1px solid rgba(255, 255, 255, 0.2)",
+  background: "rgba(255, 255, 255, 0.1)",
   color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  cursor: loading ? "not-allowed" : "pointer",
-  fontWeight: "bold",
+  fontSize: "1rem",
+  backdropFilter: "blur(10px)",
+  transition: "all 0.3s ease",
+  fontFamily: "'Inter', sans-serif",
+  fontWeight: "400" 
+});
+
+const buttonStyle = (darkMode, loading) => ({ 
+  width: "100%", 
+  padding: "15px", 
+  borderRadius: "8px", 
+  background: loading ? "#999" : "#1976d2", 
+  color: "#fff", 
+  border: "none", 
+  cursor: loading ? "not-allowed" : "pointer", 
+  fontWeight: "500", 
+  fontSize: "1rem",
+  marginTop: "10px",
+  marginBottom: "20px",
+  transition: "all 0.3s ease",
+  fontFamily: "'Inter', sans-serif"
+});
+
+const messageStyle = { 
+  textAlign: "center", 
+  marginTop: "15px",
+  color: "#4caf50",
+  fontWeight: "500"
+};
+
+const loginLinkStyle = (darkMode) => ({ 
+  textAlign: "center", 
+  marginTop: "20px", 
+  color: "#ddd", 
+  cursor: "pointer",
+  fontSize: "0.95rem"
 });

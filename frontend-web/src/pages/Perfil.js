@@ -1,290 +1,316 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { obterPesquisasUsuario, obterResultadoPesquisa } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
-// Mapeamentos de categorias e traduções
+
 const categoriasPT = {
-  "ART_AND_DESIGN": "Arte e Design",
-  "BEAUTY": "Beleza",
-  "BOOKS_AND_REFERENCE": "Livros e Referências",
-  "BUSINESS": "Negócios",
-  "COMICS": "Quadrinhos",
-  "COMMUNICATION": "Comunicação",
-  "DATING": "Relacionamento",
-  "EDUCATION": "Educação",
-  "ENTERTAINMENT": "Entretenimento",
-  "EVENTS": "Eventos",
-  "FAMILY": "Família",
-  "FINANCE": "Finanças",
-  "FOOD_AND_DRINK": "Comida e Bebida",
-  "GAME": "Jogos",
-  "HOUSE_AND_HOME": "Casa e Lar",
-  "LIBRARIES_AND_DEMO": "Bibliotecas e Demonstração",
-  "LIFESTYLE": "Estilo de Vida",
-  "MAPS_AND_NAVIGATION": "Mapas e Navegação",
-  "MEDICAL": "Medicina",
-  "NEWS_AND_MAGAZINES": "Notícias e Revistas",
-  "PARENTING": "Paternidade",
-  "PERSONALIZATION": "Personalização",
-  "PHOTOGRAPHY": "Fotografia",
-  "PRODUCTIVITY": "Produtividade",
-  "SHOPPING": "Compras",
-  "SOCIAL": "Social",
-  "SPORTS": "Esportes",
-  "TOOLS": "Ferramentas",
-  "TRAVEL_AND_LOCAL": "Viagem e Localização",
-  "VIDEO_PLAYERS": "Video Players",
-  "WEATHER": "Clima",
-  "HEALTH_AND_FITNESS": "Saúde e Fitness",
+  "ART_AND_DESIGN": "Arte e Design", "BEAUTY": "Beleza", "BOOKS_AND_REFERENCE": "Livros e Referências",
+  "BUSINESS": "Negócios", "COMICS": "Quadrinhos", "COMMUNICATION": "Comunicação", "DATING": "Relacionamento",
+  "EDUCATION": "Educação", "ENTERTAINMENT": "Entretenimento", "EVENTS": "Eventos", "FAMILY": "Família",
+  "FINANCE": "Finanças", "FOOD_AND_DRINK": "Comida e Bebida", "GAME": "Jogos", "HOUSE_AND_HOME": "Casa e Lar",
+  "LIBRARIES_AND_DEMO": "Bibliotecas e Demonstração", "LIFESTYLE": "Estilo de Vida",
+  "MAPS_AND_NAVIGATION": "Mapas e Navegação", "MEDICAL": "Medicina", "NEWS_AND_MAGAZINES": "Notícias e Revistas",
+  "PARENTING": "Paternidade", "PERSONALIZATION": "Personalização", "PHOTOGRAPHY": "Fotografia",
+  "PRODUCTIVITY": "Produtividade", "SHOPPING": "Compras", "SOCIAL": "Social", "SPORTS": "Esportes",
+  "TOOLS": "Ferramentas", "TRAVEL_AND_LOCAL": "Viagem e Localização", "VIDEO_PLAYERS": "Vídeo Players",
+  "WEATHER": "Clima", "HEALTH_AND_FITNESS": "Saúde e Fitness"
 };
 
 const traducao = {
-  sentiment: {
-    POSITIVO: "Positivo",
-    NEUTRO: "Neutro",
-    NEGATIVO: "Negativo",
-    "0.0": "Neutro",
-    "1.0": "Positivo",
-    "-1.0": "Negativo",
-  },
+  sentiment: { "0.0": "Neutro", "1.0": "Positivo", "-1.0": "Negativo" },
   type: { Free: "Grátis", Paid: "Pago" },
-  size: {
-    1: "Pequeno (até 10 MB)",
-    2: "Médio (10 a 50 MB)",
-    3: "Grande (mais de 50 MB)",
-  },
+  size: { 1: "Pequeno (até 10 MB)", 2: "Médio (10 a 50 MB)", 3: "Grande (mais de 50 MB)" },
   content_rating: {
-    1: "Livre",
-    2: "Livre acima de 10 anos",
-    3: "Adolescente",
-    4: "Acima de 17 anos",
-    5: "Adultos +18",
+    1: "Livre", 2: "Livre acima de 10 anos", 3: "Adolescente",
+    4: "Acima de 17 anos", 5: "Adultos +18"
   },
   android_version: {
-    2: "até 2.0",
-    3: "até 3.0",
-    4: "até 4.0",
-    5: "até 5.0",
-    6: "até 6.0",
-    7: "até 7.0",
-    8: "acima de 8.0",
+    2:"até 2.0", 3:"até 3.0", 4:"até 4.0", 5:"até 5.0",
+    6:"até 6.0", 7:"até 7.0", 8:"acima de 8.0"
   },
   rating: {
-    1: "1 estrela",
-    2: "2 estrelas",
-    3: "3 estrelas",
-    4: "4 estrelas",
-    5: "5 estrelas",
-  },
+    1:"1 estrela", 2:"2 estrelas", 3:"3 estrelas", 4:"4 estrelas", 5:"5 estrelas"
+  }
 };
 
 export default function Perfil() {
-  const { darkMode } = useTheme();
-  const { user, token, signOut } = useAuth();
+  const { colors } = useTheme();
+  const { user, token } = useAuth(); 
+  const navigate = useNavigate();
+
   const [pesquisas, setPesquisas] = useState([]);
   const [expanded, setExpanded] = useState(null);
   const [loading, setLoading] = useState(true);
 
+ 
   useEffect(() => {
-    const carregarPesquisas = async () => {
-      if (user?.id && token) {
-        try {
-          // Usando a rota correta do backend
-          const response = await fetch(`https://six-dsm-pi-smartranking.onrender.com/api/pesquisas/user/${user.id}`, {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-          });
-          
-          if (response.ok) {
-            const pesquisasData = await response.json();
-            setPesquisas(pesquisasData || []);
-          } else {
-            console.error("Erro ao carregar pesquisas:", response.status);
-            setPesquisas([]);
-          }
-        } catch (err) {
-          console.error("Erro ao carregar pesquisas:", err);
-          setPesquisas([]);
-        } finally {
-          setLoading(false);
-        }
+    let ativo = true;
+
+    const load = async () => {
+      if (!user?.id) return;
+
+      try {
+        const dados = await obterPesquisasUsuario(user.id, token);
+        const arr = Array.isArray(dados) ? [...dados] : [];
+
+        // ordenar "da mais antiga para a mais nova" = 1,2,3,4...
+        arr.sort((a, b) => new Date(a.criado_em) - new Date(b.criado_em));
+
+        if (ativo) setPesquisas(arr);
+      } catch (err) {
+        console.error("Erro buscando pesquisas:", err);
+      } finally {
+        if (ativo) setLoading(false);
       }
     };
 
-    carregarPesquisas();
+    load();
+    const timer = setInterval(load, 5000);
+
+    return () => { ativo = false; clearInterval(timer); };
   }, [user, token]);
 
-  const handleLogout = () => {
-    signOut();
-    window.location.href = "/";
-  };
 
-  const toggleExpand = (index) => {
-    setExpanded(expanded === index ? null : index);
+  const abrirPesquisa = async (pesquisaId) => {
+    try {
+      const resp = await obterResultadoPesquisa(pesquisaId, token);
+
+      sessionStorage.setItem("last_ranking", JSON.stringify(resp));
+
+      navigate("/ranking");
+    } catch (err) {
+      alert("Erro ao abrir resultado.");
+    }
   };
 
   if (!user) {
     return (
-      <div>
-        <h2 style={titleStyle(darkMode)}>Nenhum usuário logado.</h2>
-      </div>
+      <h2 style={{ color: "#fff", textAlign: "center" }}>
+        Nenhum usuário logado.
+      </h2>
     );
   }
 
+
   return (
-    <div>
-      <h2 style={titleStyle(darkMode)}>Perfil do Usuário</h2>
+    <div style={{ 
+      padding: 20, 
+      maxWidth: 1200, 
+      margin: "0 auto",
+      minHeight: "calc(70vh - 70px)"
+    }}>
+      <h2 style={{ 
+        textAlign: "center", 
+        color: colors.text, 
+        marginBottom: 10,
+        fontSize: "2rem"
+      }}>
+        Perfil do Usuário
+      </h2>
 
-      <div style={sectionStyle}>
-        <div><strong>Nome:</strong> {user.nome}</div>
-        <div><strong>Email:</strong> {user.email}</div>
-        <div><strong>Data de Nascimento:</strong> {user.data_nascimento}</div>
-      </div>
+      {/* SUBTÍTULO DO HISTÓRICO FORA DOS CONTAINERS */}
+      <h3 style={{ 
+        color: colors.accent, 
+        textAlign: "center", 
+        marginBottom: 25,
+        fontSize: "1.5rem"
+      }}>
+         Histórico de Pesquisas
+      </h3>
 
-      <div style={{ marginTop: "30px" }}>
-        <h3 style={subtitleStyle(darkMode)}>Histórico de Pesquisas</h3>
-
-        {loading ? (
-          <p style={{ textAlign: "center", color: darkMode ? "#ccc" : "#666" }}>
-            Carregando...
-          </p>
-        ) : pesquisas.length > 0 ? (
-          pesquisas.map((pesquisa, index) => (
-            <div key={index} style={pesquisaItemStyle(darkMode)}>
-              <div 
-                style={pesquisaHeaderStyle}
-                onClick={() => toggleExpand(index)}
-              >
-                <div>
-                  <div style={pesquisaTitleStyle}>
-                    Pesquisa {index + 1}
-                  </div>
-                  <div style={pesquisaDetailStyle}>
-                    Categoria: {categoriasPT[pesquisa.category] || pesquisa.category}
-                  </div>
-                  <div style={pesquisaDetailStyle}>
-                    Data: {new Date(pesquisa.criado_em).toLocaleString("pt-BR")}
-                  </div>
-                </div>
-                <div style={expandIconStyle}>
-                  {expanded === index ? "▲" : "▼"}
-                </div>
-              </div>
-
-              {expanded === index && (
-                <div style={pesquisaDetailsStyle}>
-                  <div style={detailRowStyle}>
-                    <strong>Sentimento:</strong> {traducao.sentiment[pesquisa.sentiment] || pesquisa.sentiment}
-                  </div>
-                  <div style={detailRowStyle}>
-                    <strong>Tipo:</strong> {traducao.type[pesquisa.app_type] || pesquisa.app_type}
-                  </div>
-                  <div style={detailRowStyle}>
-                    <strong>Tamanho:</strong> {traducao.size[pesquisa.app_size] || pesquisa.app_size}
-                  </div>
-                  <div style={detailRowStyle}>
-                    <strong>Classificação Indicativa:</strong> {traducao.content_rating[pesquisa.content_rating] || pesquisa.content_rating}
-                  </div>
-                  <div style={detailRowStyle}>
-                    <strong>Versão Android:</strong> {traducao.android_version[pesquisa.android_version] || pesquisa.android_version}
-                  </div>
-                  <div style={detailRowStyle}>
-                    <strong>Avaliação Mínima:</strong> {traducao.rating[pesquisa.min_rating] || pesquisa.min_rating}
-                  </div>
-                </div>
-              )}
+      {/* LAYOUT EM DUAS COLUNAS */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 2fr",
+        gap: 30,
+        alignItems: "start"
+      }}>
+        
+        {/* COLUNA DA ESQUERDA - DADOS DO USUÁRIO */}
+        <div>
+          {/* CARD DO USUÁRIO */}
+          <div style={{
+            background: "rgba(0,0,0,0.55)",
+            padding: 30,
+            borderRadius: 16,
+            textAlign: "center",
+            marginBottom: 20,
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)"
+          }}>
+            <div style={{
+              width: 80,
+              height: 80,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #fbc02d, #ff9800)",
+              margin: "0 auto 20px auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "2rem",
+              color: "#fff"
+            }}>
+              {user.nome?.charAt(0)?.toUpperCase() || "U"}
             </div>
-          ))
-        ) : (
-          <p style={{ textAlign: "center", color: darkMode ? "#ccc" : "#666" }}>
-            Nenhuma pesquisa encontrada.
-          </p>
-        )}
-      </div>
+            
+            <h3 style={{ 
+              color: "#fff", 
+              marginBottom: 10,
+              fontSize: "1.5rem"
+            }}>
+              {user.nome}
+            </h3>
+            <p style={{ 
+              color: "#ddd", 
+              marginBottom: 8,
+              fontSize: "1rem"
+            }}>
+               {user.email}
+            </p>
+            <p style={{ 
+              color: "#ddd",
+              fontSize: "0.9rem"
+            }}>
+               {user.data_nascimento ? new Date(user.data_nascimento).toLocaleDateString("pt-BR") : "Data não informada"}
+            </p>
+          </div>
+        </div>
 
-      <button 
-        onClick={handleLogout}
-        style={logoutButtonStyle(darkMode)}
-      >
-        Sair da Conta
-      </button>
+        {/* COLUNA DA DIREITA - HISTÓRICO DE PESQUISAS */}
+        <div>
+          {loading ? (
+            <div style={{ 
+              textAlign: "center", 
+              color: colors.text,
+              padding: 40 
+            }}>
+              <p>Carregando suas pesquisas...</p>
+            </div>
+          ) : pesquisas.length === 0 ? (
+            <div style={{ 
+              textAlign: "center", 
+              color: colors.text,
+              padding: 40,
+              background: "rgba(0,0,0,0.3)",
+              borderRadius: 12
+            }}>
+              <p style={{ fontSize: "1.1rem", marginBottom: 10 }}>
+                Nenhuma pesquisa encontrada.
+              </p>
+              <p style={{ opacity: 0.8 }}>
+                Faça sua primeira pesquisa para ver o histórico aqui!
+              </p>
+            </div>
+          ) : (
+            <div style={{ maxHeight: "600px", overflowY: "auto", paddingRight: 10 }}>
+              {pesquisas.map((p, i) => {
+                const index = i + 1;
+                const aberto = expanded === i;
+
+                return (
+                  <div key={p.id} style={{
+                    background: "rgba(0,0,0,0.55)",
+                    borderRadius: 12,
+                    padding: 20,
+                    marginBottom: 15,
+                    color: "#fff",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    transition: "all 0.3s ease"
+                  }}>
+                    <div
+                      style={{ 
+                        display: "flex", 
+                        justifyContent: "space-between", 
+                        alignItems: "center",
+                        cursor: "pointer" 
+                      }}
+                      onClick={() => setExpanded(aberto ? null : i)}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontWeight: "bold", 
+                          fontSize: "1.1rem",
+                          marginBottom: 5
+                        }}>
+                           Pesquisa {index}
+                        </div>
+                        <div style={{ color: "#ccc", fontSize: "0.9rem" }}>
+                           {categoriasPT[p.category] ?? p.category}
+                        </div>
+                        <div style={{ color: "#ccc", fontSize: "0.9rem" }}>
+                           {new Date(p.criado_em).toLocaleString("pt-BR")}
+                        </div>
+                      </div>
+
+                      <div style={{ 
+                        color: "#fbc02d", 
+                        fontSize: 24,
+                        transition: "transform 0.3s ease",
+                        transform: aberto ? "rotate(180deg)" : "rotate(0deg)"
+                      }}>
+                        {aberto ? "▲" : "▼"}
+                      </div>
+                    </div>
+
+                    {aberto && (
+                      <div style={{ 
+                        marginTop: 15, 
+                        color: "#ddd",
+                        padding: 15,
+                        background: "rgba(255,255,255,0.1)",
+                        borderRadius: 8,
+                        borderLeft: "3px solid #fbc02d"
+                      }}>
+                        <div style={{ 
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 10,
+                          marginBottom: 15
+                        }}>
+                          <div><strong>Sentimento:</strong> {traducao.sentiment[p.sentiment] ?? p.sentiment}</div>
+                          <div><strong>Tipo:</strong> {traducao.type[p.app_type] ?? p.app_type}</div>
+                          <div><strong>Tamanho:</strong> {traducao.size[p.app_size] ?? p.app_size}</div>
+                          <div><strong>Classificação:</strong> {traducao.content_rating[p.content_rating] ?? p.content_rating}</div>
+                          <div><strong>Versão Android:</strong> {traducao.android_version[p.android_version] ?? p.android_version}</div>
+                          <div><strong>Avaliação mínima:</strong> {traducao.rating[p.min_rating] ?? p.min_rating}</div>
+                        </div>
+
+                        <button
+                          onClick={() => abrirPesquisa(p.id)}
+                          style={{
+                            width: "100%",
+                            background: "#fbc02d",
+                            padding: 12,
+                            borderRadius: 8,
+                            border: "none",
+                            cursor: "pointer",
+                            color: "#000",
+                            fontWeight: "600",
+                            fontSize: "1rem",
+                            transition: "all 0.3s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.target.style.background = "#ffd54f";
+                            e.target.style.transform = "translateY(-2px)";
+                          }}
+                          onMouseOut={(e) => {
+                            e.target.style.background = "#fbc02d";
+                            e.target.style.transform = "translateY(0)";
+                          }}
+                        >
+                           Ver Resultado Completo
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-
-// Estilos para o Perfil
-const titleStyle = (darkMode) => ({
-  marginBottom: "20px",
-  color: darkMode ? "#e8eaed" : "#202124",
-  textAlign: "center"
-});
-
-const sectionStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "10px",
-  marginBottom: "20px"
-};
-
-const subtitleStyle = (darkMode) => ({
-  color: darkMode ? "#e8eaed" : "#202124",
-  textAlign: "center",
-  marginBottom: "15px"
-});
-
-const pesquisaItemStyle = (darkMode) => ({
-  padding: "15px",
-  marginBottom: "10px",
-  borderRadius: "8px",
-  backgroundColor: darkMode ? "#3c3c3c" : "#f5f5f5",
-  border: darkMode ? "1px solid #555" : "1px solid #ddd",
-});
-
-const pesquisaHeaderStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  cursor: "pointer"
-};
-
-const pesquisaTitleStyle = {
-  fontWeight: "bold",
-  marginBottom: "5px"
-};
-
-const pesquisaDetailStyle = {
-  fontSize: "14px",
-  color: "#666",
-  marginBottom: "2px"
-};
-
-const expandIconStyle = {
-  color: "#fbc02d",
-  fontSize: "18px"
-};
-
-const pesquisaDetailsStyle = {
-  marginTop: "10px",
-  paddingTop: "10px",
-  borderTop: "1px solid #555"
-};
-
-const detailRowStyle = {
-  marginBottom: "5px",
-  fontSize: "14px"
-};
-
-const logoutButtonStyle = (darkMode) => ({
-  marginTop: "20px",
-  padding: "10px 20px",
-  background: "#d32f2f",
-  color: "#fff",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "bold",
-  width: "100%"
-});

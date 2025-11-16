@@ -2,7 +2,7 @@ import React from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 
-// Mapeamento de categorias
+// tradução categorias EN -> PT
 const categoriasPT = {
   "ART_AND_DESIGN": "Arte e Design",
   "BEAUTY": "Beleza",
@@ -33,32 +33,68 @@ const categoriasPT = {
   "SPORTS": "Esportes",
   "TOOLS": "Ferramentas",
   "TRAVEL_AND_LOCAL": "Viagem e Localização",
-  "VIDEO_PLAYERS": "Video Players",
+  "VIDEO_PLAYERS": "Vídeo Players",
   "WEATHER": "Clima",
   "HEALTH_AND_FITNESS": "Saúde e Fitness",
 };
 
 export default function Ranking() {
-  const { darkMode } = useTheme();
+  const { darkMode } = useTheme(); 
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Obtém os dados da pesquisa passados pela página de Pesquisa
-  const rankingData = location.state?.rankingData || null;
-  const resultados = rankingData?.resultados || [];
 
-  // Se não houver dados, mostra mensagem
+  // pega os dados vindos via navigate state ou sessionStorage
+  const rankingData =
+    location.state?.rankingData ||
+    (() => {
+      try {
+        return JSON.parse(sessionStorage.getItem("last_ranking"));
+      } catch {
+        return null;
+      }
+    })();
+
+ 
+  const resultados =
+    Array.isArray(rankingData)
+      ? rankingData
+      : rankingData?.resultados || rankingData?.data?.resultados || [];
+
+  const top10 = resultados.filter((r) => r.tipo_resultado === "TOP10_RANKING");
+  const recomendacoes = resultados.filter((r) => r.tipo_resultado === "KNN_RECOMENDACAO");
+
   if (!rankingData || resultados.length === 0) {
     return (
-      <div>
-        <h2 style={titleStyle(darkMode)}>Ranking</h2>
-        <div style={noDataStyle(darkMode)}>
-          <p>Nenhum resultado disponível ainda.</p>
-          <p>Faça uma pesquisa para ver o ranking e recomendações.</p>
-          <button 
-            onClick={() => navigate("/pesquisa")}
-            style={buttonStyle(darkMode)}
-          >
+      <div style={{ 
+        padding: 20, 
+        maxWidth: 1200, 
+        margin: "0 auto",
+        minHeight: "calc(65vh - 65px)"
+      }}>
+        <h2 style={{ textAlign: "center", color: darkMode ? "#e8eaed" : "#202124", marginBottom: 10 }}>Ranking</h2>
+        <div style={{
+          textAlign: "center",
+          padding: 60,
+          backgroundColor: darkMode ? "rgba(44, 44, 44, 0.8)" : "rgba(245, 245, 245, 0.8)",
+          borderRadius: 16,
+          border: darkMode ? "1px solid #444" : "1px solid #ddd",
+          backdropFilter: "blur(10px)",
+          maxWidth: 600,
+          margin: "0 auto"
+        }}>
+          <p style={{ fontSize: "1.2rem", marginBottom: 15 }}>Nenhum resultado disponível ainda.</p>
+          <p style={{ marginBottom: 25, opacity: 0.8 }}>Faça uma pesquisa para ver o ranking e recomendações.</p>
+          <button onClick={() => navigate("/pesquisa")} style={{
+            marginTop: 12, 
+            padding: 15, 
+            background: "#fbc02d", 
+            border: "none", 
+            borderRadius: 8, 
+            cursor: "pointer",
+            fontSize: "1rem",
+            fontWeight: "600",
+            minWidth: 200
+          }}>
             Ir para Pesquisa
           </button>
         </div>
@@ -66,135 +102,177 @@ export default function Ranking() {
     );
   }
 
-  // Filtra os resultados
-  const top10 = resultados.filter((r) => r.tipo_resultado === "TOP10_RANKING");
-  const recomendacoes = resultados.filter((r) => r.tipo_resultado === "KNN_RECOMENDACAO");
+  // componente card usado nas duas listas
+  const Card = ({ pos, title, lines = [], accent }) => (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      padding: 18,
+      marginBottom: 15,
+      borderRadius: 12,
+      background: "rgba(0,0,0,0.55)",
+      color: "#fff",
+      border: "1px solid rgba(255,255,255,0.1)",
+      transition: "all 0.3s ease"
+    }}>
+      <div style={{
+        minWidth: 45,
+        height: 45,
+        textAlign: "center",
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#000",
+        backgroundColor: accent || "#fbc02d",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+      }}>{pos}</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 16, fontWeight: "700", marginBottom: 8 }}>{title}</div>
+        {lines.map((l, i) => (
+          <div key={i} style={{ fontSize: 14, color: "#ddd", lineHeight: 1.4 }}>{l}</div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
-    <div>
-      <h2 style={titleStyle(darkMode)}>Resultado da Pesquisa</h2>
+    <div style={{ 
+      padding: 20, 
+      maxWidth: 1200, 
+      margin: "0 auto",
+      minHeight: "calc(65vh - 65px)"
+    }}>
+      <h2 style={{ 
+        textAlign: "center", 
+        color: darkMode ? "#e8eaed" : "#202124", 
+        marginBottom: 10,
+        fontSize: "2rem"
+      }}>
+        Resultado da Pesquisa
+      </h2>
 
-      {/* Ranking Principal */}
-      {top10.length > 0 && (
-        <div style={{ marginBottom: "30px" }}>
-          <h3 style={subtitleStyle(darkMode)}>Top Ranking</h3>
-          {top10.map((item, index) => (
-            <div key={index} style={cardStyle(darkMode)}>
-              <div style={positionStyle}>{item.posicao ?? index + 1}</div>
-              <div style={{ flex: 1 }}>
-                <div style={appNameStyle}>{item.app_nome}</div>
-                <div style={detailStyle(darkMode)}>
-                  Categoria: {categoriasPT[item.categoria] || item.categoria}
-                </div>
-                <div style={detailStyle(darkMode)}>
-                  Nota Final: {item.nota_final ?? item.rating}
-                </div>
-              </div>
+      {/* LAYOUT EM DUAS COLUNAS - RANKING ESQUERDA, RECOMENDAÇÕES DIREITA */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 30,
+        alignItems: "start",
+        marginBottom: 30
+      }}>
+        
+        {/* COLUNA DA ESQUERDA - TOP RANKING */}
+        <div>
+          <h3 style={{ 
+            textAlign: "center", 
+            color: "#fbc02d", 
+            fontSize: "1.5rem", 
+            marginBottom: 20,
+            padding: 15,
+            background: "rgba(0,0,0,0.3)",
+            borderRadius: 12,
+            border: "1px solid rgba(251, 192, 45, 0.3)"
+          }}>
+            🏆 Top Ranking
+          </h3>
+          
+          {top10.length > 0 ? (
+            <div style={{ height: "500px", overflowY: "auto", paddingRight: 10 }}>
+              {top10.map((item, idx) => (
+                <Card
+                  key={idx}
+                  pos={item.posicao ?? idx + 1}
+                  title={item.app_nome}
+                  lines={[
+                    `📁 Categoria: ${categoriasPT[item.categoria] || item.categoria}`,
+                    `⭐ Nota Final: ${item.nota_final ?? item.rating ?? "—"}`,
+                  ]}
+                  accent="#fbc02d"
+                />
+              ))}
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Recomendações */}
-      {recomendacoes.length > 0 && (
-        <div style={{ marginBottom: "30px" }}>
-          <h3 style={subtitleStyle(darkMode)}>Recomendações</h3>
-          {recomendacoes.map((item, index) => (
-            <div key={index} style={cardStyle(darkMode)}>
-              <div style={{...positionStyle, color: "#4fc3f7"}}>
-                {item.posicao ?? index + 1}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={appNameStyle}>{item.app_nome}</div>
-                <div style={detailStyle(darkMode)}>
-                  Categoria: {categoriasPT[item.categoria] || item.categoria}
-                </div>
-              </div>
+          ) : (
+            <div style={{ 
+              textAlign: "center", 
+              color: "#fff",
+              padding: 40,
+              background: "rgba(0,0,0,0.3)",
+              borderRadius: 12
+            }}>
+              <p>Nenhum resultado no ranking.</p>
             </div>
-          ))}
+          )}
         </div>
-      )}
 
-      <button 
-        onClick={() => navigate("/pesquisa")}
-        style={secondaryButtonStyle(darkMode)}
-      >
-        Nova Pesquisa
-      </button>
+        {/* COLUNA DA DIREITA - RECOMENDAÇÕES */}
+        <div>
+          <h3 style={{ 
+            textAlign: "center", 
+            color: "#81c995", 
+            fontSize: "1.5rem", 
+            marginBottom: 20,
+            padding: 15,
+            background: "rgba(0,0,0,0.3)",
+            borderRadius: 12,
+            border: "1px solid rgba(129, 201, 149, 0.3)"
+          }}>
+            Recomendações Baseadas em Similaridades
+          </h3>
+          
+          {recomendacoes.length > 0 ? (
+            <div style={{ height: "500px", overflowY: "auto", paddingRight: 10 }}>
+              {recomendacoes.map((item, idx) => (
+                <Card
+                  key={idx}
+                  pos={item.posicao ?? idx + 1}
+                  title={item.app_nome}
+                  lines={[`📁 Categoria: ${categoriasPT[item.categoria] || item.categoria}`]}
+                  accent="#81c995"
+                />
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              textAlign: "center", 
+              color: "#fff",
+              padding: 40,
+              background: "rgba(0,0,0,0.3)",
+              borderRadius: 12
+            }}>
+              <p>Nenhuma recomendação disponível.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* BOTÃO NOVA PESQUISA */}
+      <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <button onClick={() => navigate("/pesquisa")} style={{
+          marginTop: 20,
+          padding: 15,
+          width: "100%",
+          background: "#fbc02d",
+          color: "#000",
+          border: "none",
+          borderRadius: 10,
+          cursor: "pointer",
+          fontWeight: "700",
+          fontSize: "1rem",
+          transition: "all 0.3s ease"
+        }}
+        onMouseOver={(e) => {
+          e.target.style.background = "#ffd54f";
+          e.target.style.transform = "translateY(-2px)";
+        }}
+        onMouseOut={(e) => {
+          e.target.style.background = "#fbc02d";
+          e.target.style.transform = "translateY(0)";
+        }}>
+          Nova Pesquisa
+        </button>
+      </div>
     </div>
   );
 }
-
-// Estilos
-const titleStyle = (darkMode) => ({
-  marginBottom: "20px",
-  color: darkMode ? "#e8eaed" : "#202124",
-  textAlign: "center"
-});
-
-const noDataStyle = (darkMode) => ({
-  textAlign: "center",
-  padding: "40px",
-  backgroundColor: darkMode ? "#2c2c2c" : "#f5f5f5",
-  borderRadius: "8px",
-  border: darkMode ? "1px solid #444" : "1px solid #ddd",
-});
-
-const buttonStyle = (darkMode) => ({
-  marginTop: "15px",
-  padding: "10px 20px",
-  background: "#fbc02d",
-  color: "#000",
-  border: "none",
-  borderRadius: "6px",
-  cursor: "pointer",
-  fontWeight: "bold",
-});
-
-const subtitleStyle = (darkMode) => ({
-  color: darkMode ? "#e8eaed" : "#202124",
-  marginBottom: "15px",
-  textAlign: "center"
-});
-
-const cardStyle = (darkMode) => ({
-  display: "flex",
-  alignItems: "center",
-  padding: "15px",
-  marginBottom: "10px",
-  borderRadius: "8px",
-  backgroundColor: darkMode ? "#2c2c2c" : "#f5f5f5",
-  border: darkMode ? "1px solid #444" : "1px solid #ddd",
-});
-
-const positionStyle = {
-  fontSize: "20px",
-  fontWeight: "bold",
-  color: "#fbc02d",
-  marginRight: "15px",
-  minWidth: "30px",
-  textAlign: "center"
-};
-
-const appNameStyle = {
-  fontSize: "16px",
-  fontWeight: "bold",
-  color: "#fff",
-  marginBottom: "5px"
-};
-
-const detailStyle = (darkMode) => ({
-  fontSize: "12px",
-  color: darkMode ? "#ccc" : "#666"
-});
-
-const secondaryButtonStyle = (darkMode) => ({
-  marginTop: "20px",
-  padding: "10px 20px",
-  background: "transparent",
-  color: darkMode ? "#8ab4f8" : "#1976d2",
-  border: `1px solid ${darkMode ? "#8ab4f8" : "#1976d2"}`,
-  borderRadius: "6px",
-  cursor: "pointer",
-  width: "100%"
-});

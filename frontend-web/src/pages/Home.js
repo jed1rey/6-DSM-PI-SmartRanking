@@ -3,141 +3,138 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export default function Homepage() {
+export default function Home() {
   const { darkMode } = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
-    <div style={containerStyle(darkMode)}>
-      {/* Título principal */}
-      <h1 style={titleStyle(darkMode)}>
-        Smart Ranking
-      </h1>
-      
-      {/* Subtítulo */}
-      <p style={subtitleStyle(darkMode)}>
-        Explore, avalie e descubra os melhores aplicativos da Google Play.
-      </p>
-
-      {/* Texto descritivo */}
-      <div style={descriptionStyle(darkMode)}>
-        <p>
-          O <strong>Smart Ranking</strong> é um sistema que permite que usuários explorem e ranqueiem apps da{" "}
-          <strong>Google Play Store</strong> com base em critérios inteligentes, e recebam recomendações com base na
-          mineração de dados a partir do ranking gerado.
+    <div style={outerContainerStyle}>
+      <div style={containerStyle(darkMode)}>
+        <h1 style={titleStyle(darkMode)}>Smart Ranking</h1>
+        <p style={subtitleStyle(darkMode)}>
+          Explore, avalie e descubra os melhores aplicativos da Google Play.
         </p>
-      </div>
 
-      {/* Botões aparecem apenas se o usuário não estiver logado */}
-      {!user && (
-        <div style={buttonsContainerStyle}>
-          <button 
-            onClick={() => navigate("/login")}
-            style={primaryButtonStyle(darkMode)}
-          >
-            Entrar
-          </button>
-          <button 
-            onClick={() => navigate("/cadastro")}
-            style={secondaryButtonStyle(darkMode)}
-          >
-            Cadastrar
-          </button>
-        </div>
-      )}
-
-      {/* Caso o usuário esteja logado, mostra uma saudação */}
-      {user && (
-        <div style={welcomeContainerStyle}>
-          <p style={welcomeTextStyle(darkMode)}>
-            Bem-vindo(a), <strong>{user.nome}</strong>!
+        <div style={descriptionStyle(darkMode)}>
+          <p>
+            O <strong>Smart Ranking</strong> é um sistema que permite que usuários explorem e ranqueiem apps da{" "}
+            <strong>Google Play Store</strong> com base em critérios inteligentes, e recebam recomendações com base na mineração de dados a partir do ranking gerado.
           </p>
-          <button 
-            onClick={() => navigate("/pesquisa")}
-            style={primaryButtonStyle(darkMode)}
-          >
-            Ir para Pesquisa
-          </button>
         </div>
-      )}
+
+        {!user ? (
+          <div style={buttonsContainer}>
+            <button onClick={() => navigate("/login")} style={primaryButton(darkMode)}>Entrar</button>
+            <button onClick={() => navigate("/cadastro")} style={secondaryButton(darkMode)}>Cadastrar</button>
+          </div>
+        ) : (
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <p style={welcomeText(darkMode)}>Bem-vindo(a), <strong>{user.nome}</strong>!</p>
+            <button onClick={() => navigate("/pesquisa")} style={primaryButton(darkMode)}>Ir para Pesquisa</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// Estilos 
+
+const outerContainerStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "calc(70vh - 70px)", 
+  padding: "20px",
+  width: "100%"
+};
+
+
 const containerStyle = (darkMode) => ({
   textAlign: "center",
-  padding: "40px 20px",
-  backgroundColor: darkMode ? "#303134" : "#ffffff",
-  borderRadius: "12px",
-  maxWidth: "800px",
-  margin: "0 auto",
+  padding: "60px 40px",
+  backgroundColor: darkMode ? "rgba(32, 33, 36, 0.75)" : "rgba(32, 33, 36, 0.75)", 
+  borderRadius: "16px",
+  maxWidth: "900px",
+  width: "100%",
+  border: darkMode ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.1)",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  minHeight: "400px"
 });
 
 const titleStyle = (darkMode) => ({
-  fontSize: "3rem",
-  fontWeight: "bold",
-  color: darkMode ? "#fbc02d" : "#1976d2",
+  fontSize: "2.8rem",
+  color: "#fff",
   marginBottom: "20px",
-  textAlign: "center"
+  fontWeight: "500", 
+  textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+  fontFamily: "'Inter', sans-serif"
 });
 
 const subtitleStyle = (darkMode) => ({
+  color: "#e8eaed",
   fontSize: "1.3rem",
-  textAlign: "center",
-  color: darkMode ? "#e8eaed" : "#444",
   marginBottom: "30px",
-  lineHeight: "1.5"
+  fontWeight: "300", 
+  opacity: 0.9,
+  fontFamily: "'Inter', sans-serif"
 });
 
 const descriptionStyle = (darkMode) => ({
+  color: "#e8eaed",
+  marginBottom: "40px",
   fontSize: "1.1rem",
-  textAlign: "center",
-  color: darkMode ? "#e8eaed" : "#444",
-  marginBottom: "30px",
-  lineHeight: "1.6"
+  lineHeight: "1.6",
+  maxWidth: "700px",
+  margin: "0 auto 40px auto",
+  opacity: 0.9,
+  fontWeight: "400",
+  fontFamily: "'Inter', sans-serif"
 });
 
-const buttonsContainerStyle = {
-  display: "flex",
-  gap: "15px",
+
+const buttonsContainer = { 
+  display: "flex", 
+  gap: "20px", 
   justifyContent: "center",
-  marginTop: "40px"
+  flexWrap: "wrap" 
 };
 
-const primaryButtonStyle = (darkMode) => ({
+const primaryButton = (darkMode) => ({
   backgroundColor: "#1976d2",
   color: "#fff",
-  padding: "14px 28px",
+  padding: "15px 30px",
   borderRadius: "8px",
   border: "none",
   cursor: "pointer",
-  fontSize: "16px",
-  fontWeight: "bold",
-  transition: "opacity 0.3s ease",
+  fontWeight: "500", 
+  fontSize: "1rem",
+  minWidth: "140px",
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+  fontFamily: "'Inter', sans-serif"
 });
 
-const secondaryButtonStyle = (darkMode) => ({
+const secondaryButton = (darkMode) => ({
   backgroundColor: "#2e7d32",
   color: "#fff",
-  padding: "14px 28px",
+  padding: "15px 30px",
   borderRadius: "8px",
   border: "none",
   cursor: "pointer",
-  fontSize: "16px",
-  fontWeight: "bold",
-  transition: "opacity 0.3s ease",
+  fontWeight: "600",
+  fontSize: "1rem",
+  minWidth: "140px",
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 12px rgba(46, 125, 50, 0.3)",
 });
 
-const welcomeContainerStyle = {
-  marginTop: "20px",
-  alignItems: "center"
-};
-
-const welcomeTextStyle = (darkMode) => ({
-  fontSize: "1.5rem",
-  color: darkMode ? "#e8eaed" : "#202124",
-  textAlign: "center",
-  marginBottom: "20px"
+const welcomeText = (darkMode) => ({
+  color: darkMode ? "#e8eaed" : "#e8eaed",
+  fontSize: "1.3rem",
+  marginBottom: "25px",
+  opacity: 0.9,
 });
