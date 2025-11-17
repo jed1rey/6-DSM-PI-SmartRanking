@@ -170,10 +170,18 @@ export default function Perfil() {
                {user.email}
             </p>
             <p style={{ 
-              color: "#ddd",
-              fontSize: "0.9rem"
-            }}>
-               {user.data_nascimento ? new Date(user.data_nascimento).toLocaleDateString("pt-BR") : "Data não informada"}
+                  color: "#ddd",
+                  fontSize: "0.9rem"
+                }}>
+              {user.data_nascimento
+                ? (() => {
+                    const d = new Date(user.data_nascimento);
+                    const dia = String(d.getUTCDate()).padStart(2, "0");
+                    const mes = String(d.getUTCMonth() + 1).padStart(2, "0");
+                    const ano = d.getUTCFullYear();
+                    return `${dia}/${mes}/${ano}`;
+                  })()
+              : "Data não informada"}
             </p>
           </div>
         </div>
