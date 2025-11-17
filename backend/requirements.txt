@@ -11,3 +11,9 @@ pandas==2.2.3
 scikit-learn==1.5.2
 numpy==1.26.4
 
+#Google Cloud Pub/Sub
+google-cloud-pubsub==2.13.12
+
+#Para envio de E-mail (SendGrid)
+sendgrid==6.11.0
+
