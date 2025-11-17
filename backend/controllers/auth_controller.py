@@ -43,7 +43,9 @@ def autenticar_usuario(email, senha):
         user_id = user["id"]
             
         # 2. Retorna o token E o ID para o usuário
-        return token
+        return {
+            "token": token
+        }
         
     return None, None
 
