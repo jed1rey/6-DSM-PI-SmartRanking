@@ -36,7 +36,7 @@ def login():
     token = autenticar_usuario(data["email"], data["senha"])
     
     if token:
-        return jsonify({"token": token})
+        return jsonify(token), 200
     return jsonify({"error": "Credenciais inválidas"}), 401
 
 
