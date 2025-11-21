@@ -53,7 +53,7 @@ Ele oferece insights sobre categorias, gêneros, preços e **qualidade de apps**
 
 O sistema é dividido em cinco grandes módulos que se integram entre si:
 
-### 🖥️ **FrontEnd**
+### 🖥️ **FRONTEND WEB**
 
 
 ---
@@ -81,7 +81,7 @@ O backend foi projetado seguindo uma **Arquitetura em Camadas** (Routes, Control
 
 4.  **Arquitetura Orientada a Eventos (Microsserviços)**
     - Utilização do **Google Cloud Pub/Sub** para desacoplar processos.
-    - **Fluxo de Boas-vindas:** Quando um usuário se cadastra, o backend publica um evento no GCP. Um **Worker** separado consome essa mensagem e dispara um e-mail transacional via **SendGrid**, garantindo que a API responda instantaneamente sem latência.
+    - **MENSAGERIA - Fluxo de Boas-vindas:** Quando um usuário se cadastra, o backend publica um evento no GCP. Um **Worker** separado consome essa mensagem e dispara um E-MAIL de BOAS-VINDAS transacional via **SendGrid**, garantindo que a API responda instantaneamente sem latência.
 
 5.  **Persistência de Dados**
     - Conexão com banco de dados **PostgreSQL**.
