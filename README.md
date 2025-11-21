@@ -13,18 +13,18 @@ Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **apl
 
 ---
 
-## ⚙️ **Tecnologias Utilizadas**
+## ⚙️ **TECNOLOGIAS UTILIZADAS**
 
-- **Frontend:** 
-- **Backend:**
-- **Mobile:** 
-- **Machine Learning:** *Python / Scikit-Learn / Pandas / NumPy*  
-- **Nuvem:** *Google Cloud Platform /Pub/Sub*  
+- **Frontend:** *React JS*
+- **Backend:** *Python Flask / PostgreSQL / Werkzeug / JWT / Psycog2 / SendGrid*
+- **Mobile:** *React Native*
+- **Machine Learning:** *Scikit-Learn / Pandas / NumPy*  
+- **Nuvem:** *Google Cloud PubSub / Microsoft Azure VM*  
 - **Versionamento:** *Git & GitHub*  
 
 ---
 
-## 👩‍💻 **Desenvolvedores**
+## 👩‍💻 **DESENVOLVEDORES**
 
 - **Paula Cristina Abib Teixeira** – *FrontEnd / Machine Learning / Documentação*  
   🔗 [Github: jed1rey](https://github.com/jed1rey)
@@ -32,12 +32,12 @@ Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **apl
 - **Allison Rodrigues de Paula e Silva** – *BackEnd / Arquitetura em Nuvem / Documentação*  
   🔗 [Github: allisonrps](https://github.com/allisonrps)
   
-- **Samir Lopes Rosa** – *Mobile / FrontEnd / Arquitetura em Nuvem*  
+- **Samir Lopes Rosa** – *FrontEnd Web e Mobile / Arquitetura em Nuvem*  
   🔗 [Github: samlope](https://github.com/samlope)
 
 ---
 
-## 📘 **Documentação**
+## 📘 **DOCUMENTAÇÃO**
 
 ### Objetivo do Projeto
 
@@ -49,7 +49,7 @@ Ele oferece insights sobre categorias, gêneros, preços e **qualidade de apps**
 
 ---
 
-## 🧩 **Arquitetura do Projeto**
+## 🧩 **ARQUITETURA DO PROJETO**
 
 O sistema é dividido em cinco grandes módulos que se integram entre si:
 
@@ -58,22 +58,58 @@ O sistema é dividido em cinco grandes módulos que se integram entre si:
 
 ---
 
-### ⚙️ **BackEnd**
+### ⚙️ **BACKEND**
+
+A camada de **BackEnd** é o núcleo de processamento do Smart Ranking. Desenvolvida em **Python** com o framework **Flask**, ela expõe uma **API RESTful** robusta que orquestra a comunicação entre o FrontEnd, o Banco de Dados e os modelos de Machine Learning.
+
+O backend foi projetado seguindo uma **Arquitetura em Camadas** (Routes, Controllers, Models, Utils) para garantir escalabilidade, segurança e manutenção limpa.
+
+#### 🧩 **Principais Funcionalidades e Arquitetura**
+
+1.  **API RESTful & Documentação**
+    - Endpoints organizados para autenticação, gestão de usuários e execução e armazenamento de pesquisas realizadas.
+    - Documentação completa da API via **OpenAPI (Swagger)**, facilitando a integração com o FrontEnd e Mobile.
+    - [📘 Smart Ranking Swagger Open API](https://app.swaggerhub.com/apis/ALLISONRPS/Smart-Ranking/1.0.0)
+
+2.  **Autenticação e Segurança**
+    - Implementação de **JWT (JSON Web Tokens)** para proteção de rotas e gestão de sessões de usuários.
+    - Hashing seguro de senhas utilizando a biblioteca `Werkzeug`.
+
+3.  **Integração com Machine Learning**
+    - O backend carrega os modelos treinados (`.pkl`) diretamente na memória.
+    - Processa as requisições do usuário em tempo real, traduzindo filtros textuais em vetores numéricos e executando o algoritmo **KNN (K-Nearest Neighbors)** para gerar o ranking Top 10 e recomendações personalizadas.
+
+4.  **Arquitetura Orientada a Eventos (Microsserviços)**
+    - Utilização do **Google Cloud Pub/Sub** para desacoplar processos.
+    - **Fluxo de Boas-vindas:** Quando um usuário se cadastra, o backend publica um evento no GCP. Um **Worker** separado consome essa mensagem e dispara um e-mail transacional via **SendGrid**, garantindo que a API responda instantaneamente sem latência.
+
+5.  **Persistência de Dados**
+    - Conexão com banco de dados **PostgreSQL**.
+    - Armazenamento histórico de todas as pesquisas realizadas (filtros utilizados) e dos resultados gerados (rankings), permitindo análises futuras de comportamento do usuário.
+
+#### 🧰 **Tecnologias e Bibliotecas Utilizadas**
+
+- **Python & Flask:** Framework principal da aplicação.
+- **PostgreSQL & Psycopg2:** Banco de dados relacional e driver de conexão.
+- **Pandas & Scikit-Learn:** Para manipulação de dados e execução dos modelos de ML dentro da API.
+- **Google Cloud Pub/Sub:** Sistema de mensageria para arquitetura assíncrona.
+- **SendGrid:** Serviço de envio de e-mails transacionais.
+- **Gunicorn:** Servidor WSGI para produção (deploy no Render).
 
 
 ---
 
-### 📱 **Mobile**
+### 📱 **MOBILE**
 
 
 ---
 
-### ☁️ **Nuvem**
+### ☁️ **NUVEM**
 
 
 ---
 
-### 🤖 **Machine Learning**
+### 🤖 **MACHINE LEARNING e DATA MINING**
 
 A camada de **Machine Learning** do **Smart Ranking** é responsável por analisar e processar dados da **Google Play Store** e suas respectivas avaliações de usuários, gerando métricas inteligentes e recomendações personalizadas de aplicativos.  
 
