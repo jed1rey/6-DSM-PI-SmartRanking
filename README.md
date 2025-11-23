@@ -55,8 +55,109 @@ O sistema é dividido em cinco grandes módulos que se integram entre si:
 
 ### 🖥️ **FRONTEND WEB**
 
+SmartRanking – Frontend Web
 
----
+Aplicação web desenvolvida em **React.js**, responsável pela interface do usuário do sistema **SmartRanking**.
+
+
+#### 🚀 **Tecnologias Utilizadas**
+
+React.js 19
+React Router DOM
+Context API (Autenticação e Tema)
+JWT Decode
+React Icons
+Google Fonts – Inter
+CSS puro
+Consumo de API REST
+
+#### 📂 Arquitetura do Projeto
+
+src/
+ ├─ components/
+ │   ├─ Header.js
+ │   ├─ Footer.js
+ │   └─ Layout.js
+ │
+ ├─ context/
+ │   ├─ AuthContext.js
+ │   └─ ThemeContext.js
+ │
+ ├─ hooks/
+ │   └─ useBackground.js
+ │
+ ├─ pages/
+ │   ├─ Home.js
+ │   ├─ Login.js
+ │   ├─ Cadastro.js
+ │   ├─ Pesquisa.js
+ │   ├─ Ranking.js
+ │   └─ Perfil.js
+ │
+ ├─ services/
+ │   └─ api.js
+ │
+ ├─ App.js
+ ├─ index.js
+ └─ index.css
+
+#### 🔐 Autenticação
+
+O sistema utiliza JWT:
+
+Armazena token e dados do usuário no localStorage.
+
+O AuthContext gerencia login, cadastro, logout e carregamento automático do usuário.
+
+Rotas protegidas:
+/pesquisa, /ranking, /perfil.
+
+#### 🎨 Sistema de Tema (Dark/Light)
+
+Gerenciado pelo ThemeContext, que fornece:
+
+Paleta de cores dinâmica
+
+Função de alternância (toggleTheme)
+
+Estilos globais suaves com transições
+
+
+
+#### 🧠 Funcionalidade Principal – Sistema de Pesquisa
+
+A página /pesquisa permite ao usuário montar filtros como:
+
+Sentimento
+Categoria
+Avaliação mínima
+Tipo de app
+Tamanho
+Número de instalações
+Classificação indicativa
+Versão mínima do Android
+Ao enviar, ocorre:
+criação da pesquisa na API
+consulta do resultado
+Navegação automática para /ranking
+
+#### 👤 Perfil do Usuário / Histórico
+
+A página /perfil exibe:
+Dados do usuário logado
+Todas as pesquisas realizadas por ele
+Detalhes dos filtros aplicados
+Opção de abrir o ranking novamente
+
+#### 📦 Como Rodar o Projeto
+
+npm install
+npm start
+
+O app rodará em:
+👉 http://localhost:3000
+
+
 
 ### ⚙️ **BACKEND**
 
@@ -101,10 +202,139 @@ O backend foi projetado seguindo uma **Arquitetura em Camadas** (Routes, Control
 
 ### 📱 **MOBILE**
 
+#### **SmartRanking — Frontend Mobile (React Native / Expo)**
+
+Aplicativo móvel do SmartRanking: frontend em **React Native (Expo)** que consome a API do SmartRanking para autenticação, criação de pesquisas e exibição de rankings e recomendações.
+
+#### 🌐 Tecnologias
+
+React Native (Expo)
+React (19)
+Expo (SDK ~54)
+React Navigation (bottom-tabs)
+Axios
+AsyncStorage (@react-native-async-storage/async-storage)
+RNPickerSelect (react-native-picker-select)
+jwt-decode (implementado manualmente no AuthContext)
+Google Fonts (Poppins via @expo-google-fonts/poppins)
+
+
+#### ⚙️ Estrutura do projeto (resumida)
+
+src/
+ ├─ navigation/
+ │   └─ AppNavigator.js
+ ├─ context/
+ │   ├─ AuthContext.js
+ │   └─ ThemeContext.js
+ ├─ screens/
+ │   ├─ Homepage.js
+ │   ├─ Login.js
+ │   ├─ Cadastro.js
+ │   ├─ Pesquisa.js
+ │   ├─ Ranking.js
+ │   └─ Perfil.js
+ ├─ services/
+ │   └─ api.js
+ App.js 
+
+#### 🚀 Como rodar (desenvolvimento)
+
+1- Instale dependências:
+
+npm install
+# ou
+yarn
+
+2-Inicie o Expo:
+
+npm start
+# ou
+expo start
+
+3-Rodar em Android/iOS:
+
+Expo Go no celular (QR code) ou emulador (expo start --android / --ios).
+
+#### 🔌 Configuração / Variáveis
+
+O app usa a URL da API definida em src/context/AuthContext.js e src/services/api.js. Ajuste conforme ambiente (dev / staging / prod). 
+
+
+#### 🔐 Autenticação
+
+Token JWT salvo em AsyncStorage (@sr:token e @sr:user).
+
+AuthContext implementa: signIn, signUp, signOut, fetchUserById.
+
+JWT é decodificado manualmente para extrair sub (id do usuário) quando necessário. 
+
+
+#### 🧭 Navegação
+
+AppNavigator usa Bottom Tab Navigator.
+
+Abas públicas: Home, Login, Cadastro.
+
+Abas privadas (após login): Pesquisa, Ranking, Perfil.
+
+Header customizado com logo e cores por rota (definidas em pageColors). 
+
+
+#### 💾 API / Interceptor
+
+src/services/api.js cria instância axios com baseURL e injeta token automaticamente via interceptor lendo AsyncStorage. 
+
+
+#### 🔍 Fluxo principal (Pesquisa → Ranking)
+
+Usuário escolhe filtros na tela Pesquisa (sentimento, categoria, rating, tipo, tamanho, installs, content_rating, android_version).
+
+Frontend faz POST em /api/pesquisas com o payload.
+
+Backend retorna pesquisa_id.
+
+Frontend faz GET em /api/resultados/{pesquisa_id} e navega para Ranking com os dados. 
+
 
 ---
 
 ### ☁️ **NUVEM**
+
+#### 🖥️ Infraestrutura – Máquina Virtual (Azure)
+
+A aplicação está hospedada em uma **Máquina Virtual (VM) na Microsoft Azure** , com as seguintes configurações:
+
+#### 📌 Configurações da Máquina Virtual
+
+| Categoria                 | Informações               |
+| ------------------------- | ------------------------- |
+| **Nome do computador**    | FATECDSM                  |
+| **Sistema operacional**   | Linux                     |
+| **Distribuição / Imagem** | Ubuntu 24.04 LTS (server) |
+| **Fornecedor da imagem**  | Canonical                 |
+| **Geração da VM**         | V2                        |
+| **Arquitetura**           | x64                       |
+| **Controlador de disco**  | SCSI                      |
+| **Hibernação**            | Desabilitado              |
+
+
+#### ⚙️ Tamanho da VM
+| Recurso         | Valor        |
+| --------------- | ------------ |
+| **Tamanho**     | Standard B2s |
+| **vCPUs**       | 2            |
+| **Memória RAM** | 4 GiB        |
+
+#### 🌐 Rede
+
+| Propriedade                | Valor                                      |
+| -------------------------- | ------------------------------------------ |
+| **Endereço IP público**    | 40.65.223.83                               |
+| **IP público → Interface** | fatecdsm329                                |
+| **IP privado**             | 10.0.0.4                                   |
+| **Virtual Network**        | FATECDSM-vnet/default                      |
+| **DNS público**            | smartranking.eastus2.cloudapp.azure.com    |
 
 
 ---
