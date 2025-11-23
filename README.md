@@ -2,7 +2,7 @@
   <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
 </p>
 
-
+[Smart Ranking](smart-ranking.vercel.app)
 
 ##  Sistema inteligente de ranking e recomendação de aplicativos da Google Play Store
 
