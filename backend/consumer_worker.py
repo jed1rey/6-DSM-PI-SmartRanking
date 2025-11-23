@@ -10,12 +10,9 @@ from utils.email_sender import send_welcome_email
 
 # --- Configuração (Lida das variáveis de ambiente) ---
 
-# Carrega o .env para que este script (rodado separadamente) 
-# também tenha acesso às variáveis de ambiente.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Credenciais do GCP (do .env do professor)
 PROJECT_ID = os.environ.get("PUB_SUB_PROJECT_ID")
 SUBSCRIPTION_ID = os.environ.get("PUB_SUB_SUBSCRIPTION_ID")
 
@@ -26,50 +23,39 @@ def processar_mensagem(message: pubsub_v1.types.ReceivedMessage):
     """
     data_str = ""
     try:
-        # 1. Decodifica a mensagem de bytes para JSON
         data_str = message.data.decode("utf-8")
         data_json = json.loads(data_str)
         event_type = data_json.get('event_type')
         
-        print(f"\n--- 📩 Mensagem Recebida (ID: {message.message_id}) ---")
-        print(f"  Evento: {event_type}")
+        # --- LOGGING LIMPO (Uma linha por evento) ---
+        print(f"📩 Recebido Evento: {event_type} (ID: {message.message_id})", end="... ")
 
         # --- LÓGICA DE ROTEAMENTO DE EVENTOS ---
         
         if event_type == "USER_REGISTERED":
-            user_id = data_json.get('user_id')
             email = data_json.get('email')
             nome = data_json.get('nome')
             
-            print(f"  Usuário ID: {user_id}")
-            print(f"  Email: {email}")
-            print(f"  Nome: {nome}")
-            
             # --- LÓGICA DE NEGÓCIOS (E-MAIL REAL) ---
-            print(f"  AÇÃO: Preparando e-mail de boas-vindas para {email}...")
-            
-            # 2. Chama o utilitário de envio de e-mail
             sucesso = send_welcome_email(email, nome)
             
             if sucesso:
-                # 3. Confirma o recebimento (ACK) para remover a mensagem da fila.
                 message.ack()
-                print(f"  Status: Mensagem confirmada (ACK).")
+                print(f"✅ E-mail enviado para {email}. (ACK)")
             else:
-                # 4. Não confirma (NACK) se o envio do e-mail falhar.
-                print(f"  Status: Envio de e-mail falhou. Mensagem não confirmada (NACK).")
                 message.nack()
+                print(f"❌ Falha no SendGrid. (NACK)")
 
         else:
-            print(f"  AVISO: Evento desconhecido '{event_type}'. Mensagem será ignorada (ACK).")
-            message.ack() # Confirma mesmo assim para não travar a fila
+            print(f"AVISO: Evento desconhecido. (ACK)")
+            message.ack()
         
     except json.JSONDecodeError:
-        print(f"❌ Erro: Mensagem não é um JSON válido. Conteúdo: {data_str}", file=sys.stderr)
-        message.ack() # Remove da fila
+        print(f"❌ Erro: Mensagem não é JSON. (ACK)", file=sys.stderr)
+        message.ack()
     except Exception as e:
-        print(f"❌ Erro inesperado ao processar mensagem {message.message_id}: {e}", file=sys.stderr)
-        message.nack() # Tenta reprocessar mais tarde
+        print(f"❌ Erro Inesperado: {e}. (NACK)", file=sys.stderr)
+        message.nack()
 
 def iniciar_consumidor():
     """
@@ -85,15 +71,19 @@ def iniciar_consumidor():
         subscriber = pubsub_v1.SubscriberClient()
         subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
 
-        print(f"🎧 Ouvindo mensagens na subscrição: {subscription_path} ...")
+        # --- NOVO: CONTROLO DE FLUXO (FlowControl) ---
+        # Define o worker para processar apenas 1 mensagem de cada vez (síncrono)
+        flow_control = pubsub_v1.types.FlowControl(max_messages=1)
+        
+        print(f"🎧 Ouvindo mensagens na subscrição: {subscription_path} ... (Modo Síncrono: 1 por vez)")
         
         # Abre a subscrição e passa a função de callback
         streaming_pull_future = subscriber.subscribe(
             subscription_path, 
-            callback=processar_mensagem
+            callback=processar_mensagem,
+            flow_control=flow_control # <-- Aplica o controlo de fluxo
         )
 
-        # Mantém o script rodando indefinidamente para "ouvir"
         print("Pressione CTRL+C para parar o consumidor.")
         while True:
             time.sleep(30)
@@ -104,7 +94,7 @@ def iniciar_consumidor():
         print(f"❌ Erro fatal no consumidor (ex: credenciais): {e}", file=sys.stderr)
     finally:
         if streaming_pull_future:
-            streaming_pull_future.cancel() # Para de "ouvir"
+            streaming_pull_future.cancel()
         if subscriber:
             subscriber.close()
 
