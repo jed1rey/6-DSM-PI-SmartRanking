@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/imagens/logo.png" alt="Logo Smart Ranking" width="500"/><br/>
+  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="500"/><br/>
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@ Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **apl
 
 | Home | Login | Cadastro |
 |------|--------|-----------|
-| ![Home](/imagens/prints/web/Home-web.jpg) | ![Login](/imagens/prints/web/Login-web.jpg) | ![Cadastro](/imagens/prints/web/Cadastro-web.jpg) |
+| ![Home](imagens/prints/web/Home.jpg) | ![Login](imagens/prints/web/Login.jpg) | ![Cadastro](imagens/prints/web/Cadastro.jpg) |
 
 ---
 
@@ -35,11 +35,11 @@ Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **apl
 
 | Pesquisa | Ranking | Perfil |
 |----------|----------|---------|
-| ![Pesquisa](/imagens/prints/web/pesquisa-web.jpg) | ![Ranking](/imagens/prints/web/Ranking-web.jpg) | ![Perfil](/imagens/prints/web/perfil-web.jpg) |
+| ![Pesquisa](imagens/prints/web/Pesquisa.jpg) | ![Ranking](imagens/prints/web/Ranking.jpg) | ![Perfil](imagens/prints/web/Perfil.jpg) |
 
 ## 📱 Mobile 
 <p align="center">
-  <img src="/imagens/prints/mobile/mobilevertical.jpg">
+  <img src="imagens/prints/mobile/mobilevertical.jpg">
 </p>
 
 
