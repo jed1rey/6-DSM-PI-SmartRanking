@@ -2,7 +2,12 @@
   <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
 </p>
 
-[Smart Ranking](smart-ranking.vercel.app)
+<p align="center">
+  <a href="http://smartranking.surge.sh" style="font-size: 22px; font-weight: bold;">
+    🌐 Acesse o site: Smart Ranking
+  </a>
+</p>
+
 
 ##  Sistema inteligente de ranking e recomendação de aplicativos da Google Play Store
 
@@ -10,6 +15,29 @@ O **Smart Ranking** é uma aplicação que permite que usuários **explorem e ra
 Por meio de **mineração de dados** e **aprendizado de máquina**, o sistema fornece **recomendações automáticas** e **insights analíticos** sobre categorias, gêneros, preços e qualidade dos apps.  
 
 Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **aplicativos de alta qualidade**. 
+
+---
+## 📱 Web 
+
+## 🏠 Home / 🔐 Login / 📝 Cadastro
+
+| Home | Login | Cadastro |
+|------|--------|-----------|
+| ![Home](./imagens/prints/web/Home-web.jpg) | ![Login](./imagens/prints/web/Login-web.jpg) | ![Cadastro](./imagens/prints/web/Cadastro-web.jpg) |
+
+---
+
+## 🔍 Pesquisa / 📊 Ranking / 👤 Perfil
+
+| Pesquisa | Ranking | Perfil |
+|----------|----------|---------|
+| ![Pesquisa](./imagens/prints/web/pesquisa-web.jpg) | ![Ranking](./imagens/prints/web/Ranking-web.jpg) | ![Perfil](./imagens/prints/web/perfil-web.jpg) |
+
+## 📱 Mobile 
+<p align="center">
+  <img src="./imagens/prints/mobile/mobilevertical.jpg">
+</p>
+
 
 ---
 
