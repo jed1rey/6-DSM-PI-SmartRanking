@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="http://smartranking.surge.sh" style="font-size: 22px;">
+  <a href="http://smart-ranking.netlify.app" style="font-size: 22px;">
     🌐 Acesse o site: Smart Ranking
   </a>
 </p>
