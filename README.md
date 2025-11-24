@@ -1,12 +1,16 @@
 <p align="center">
-  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="700"/><br/>
+  <img src="imagens/logo.png" alt="Logo Smart Ranking" width="500"/><br/>
 </p>
 
 <p align="center">
-  <a href="http://smartranking.surge.sh" style="font-size: 22px; font-weight: bold;">
+  <a href="http://smartranking.surge.sh" style="font-size: 22px;">
     🌐 Acesse o site: Smart Ranking
   </a>
 </p>
+
+[📘 API - Swagger - Documentação](https://app.swaggerhub.com/apis/ALLISONRPS/Smart-Ranking/1.0.0)
+
+[📘 Smart Ranking - Notion - Documentação](https://www.notion.so/PI-Smart-Ranking-273aff3cd6f08010a54ee6e3a059dd61?showMoveTo=true&saveParent=true)
 
 
 ##  Sistema inteligente de ranking e recomendação de aplicativos da Google Play Store
@@ -72,8 +76,6 @@ Esse projeto tem como objetivo auxiliar **usuários finais** a descobrirem **apl
 O **Smart Ranking** é um sistema que permite que usuários explorem e ranqueiem apps da Google Play Store com base em critérios inteligentes, e recebam recomendações com base na mineração de dados a partir do ranking gerado.
 
 Ele oferece insights sobre categorias, gêneros, preços e **qualidade de apps**, ajudando tanto **desenvolvedores** a escolherem nichos de mercado quanto **usuários finais** a descobrirem **apps de alta qualidade**.
-
-[📘 Clique aqui para saber mais sobre a documentação completa](https://www.notion.so/PI-Smart-Ranking-273aff3cd6f08010a54ee6e3a059dd61?showMoveTo=true&saveParent=true)
 
 ---
 
