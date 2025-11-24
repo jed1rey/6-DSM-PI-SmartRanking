@@ -77,16 +77,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const signUp = async ({ nome, data_nascimento, email, senha }) => {
-    try {
-      const res = await registerUser({ nome, data_nascimento, email, senha });
-      // se o backend retorna algo diferente, ainda tentamos o login automático
-      await signIn({ email, senha });
-    } catch (err) {
-      console.error("signUp error:", err);
-      throw err;
-    }
-  };
+const signUp = async ({ nome, data_nascimento, email, senha }) => {
+  try {
+    await registerUser({ nome, data_nascimento, email, senha });
+    await signIn({ email, senha });
+  } catch (err) {
+    console.error("signUp error:", err);
+    throw err;
+  }
+};
 
   const signOut = () => {
     localStorage.removeItem("@sr:token");
